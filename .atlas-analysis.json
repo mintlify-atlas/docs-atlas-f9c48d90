@@ -1,0 +1,146 @@
+{
+  "projectType": "saas",
+  "projectName": "Yggdrasil",
+  "projectDescription": "A full-stack monorepo platform powering the IFI-Navet student association with event management, job listings, and student services.",
+  "theme": "almond",
+  "primaryColor": "#4F46E5",
+  "lightColor": "#818CF8",
+  "darkColor": "#3730A3",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "architecture"
+            ]
+          },
+          {
+            "group": "Development",
+            "pages": [
+              "development/setup",
+              "development/environment",
+              "development/commands"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Applications",
+        "groups": [
+          {
+            "group": "Midgard",
+            "pages": [
+              "applications/midgard/overview",
+              "applications/midgard/features",
+              "applications/midgard/structure"
+            ]
+          },
+          {
+            "group": "Bifrost",
+            "pages": [
+              "applications/bifrost/overview",
+              "applications/bifrost/features",
+              "applications/bifrost/structure"
+            ]
+          },
+          {
+            "group": "Hugin",
+            "pages": [
+              "applications/hugin/overview",
+              "applications/hugin/features",
+              "applications/hugin/structure"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Backend",
+        "groups": [
+          {
+            "group": "Convex",
+            "pages": [
+              "backend/convex-setup",
+              "backend/schema",
+              "backend/functions"
+            ]
+          },
+          {
+            "group": "Authentication",
+            "pages": [
+              "backend/auth/clerk-integration",
+              "backend/auth/access-rights"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Packages",
+        "groups": [
+          {
+            "group": "UI Library",
+            "pages": [
+              "packages/ui/overview",
+              "packages/ui/components"
+            ]
+          },
+          {
+            "group": "Shared Packages",
+            "pages": [
+              "packages/shared/overview",
+              "packages/auth/overview",
+              "packages/emails/overview"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Contributing",
+        "groups": [
+          {
+            "group": "Getting Involved",
+            "pages": [
+              "contributing/guide",
+              "contributing/code-of-conduct",
+              "contributing/security"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Event management with real-time registrations and waitlists",
+    "Job listings and company profiles for student recruitment",
+    "Student profile management with points system",
+    "Admin dashboard (Bifrost) for content and event management",
+    "Public-facing website (Midgard) for students and companies",
+    "Real-time sync with Convex backend",
+    "Authentication and authorization with Clerk",
+    "Shared UI component library with shadcn/ui",
+    "Monorepo architecture with Turborepo",
+    "Email notifications with React Email"
+  ],
+  "publicApiSurface": [
+    "events.list",
+    "events.getById",
+    "events.create",
+    "events.update",
+    "registration.register",
+    "registration.cancel",
+    "registration.getByEvent",
+    "companies.list",
+    "companies.getById",
+    "students.list",
+    "students.getById",
+    "jobListings.list",
+    "jobListings.getById",
+    "resources.list",
+    "users.getById",
+    "accessRights.check"
+  ]
+}
