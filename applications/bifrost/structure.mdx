@@ -8,7 +8,7 @@ icon: 'folder-tree'
 
 Bifrost follows Next.js App Router conventions with a clear separation of concerns.
 
-```
+```text
 apps/bifrost/
 ├── src/
 │   ├── app/              # Next.js App Router pages
@@ -40,7 +40,7 @@ The `src/app` directory uses Next.js 16 App Router with file-based routing.
 
 ### Admin Pages (Protected)
 
-```
+```text
 app/(admin-pages)/
 ├── companies/
 │   ├── [slug]/          # Company detail page
@@ -60,7 +60,7 @@ app/(admin-pages)/
 
 ### Public Pages
 
-```
+```text
 app/
 ├── events/
 │   ├── [slug]/
@@ -92,7 +92,7 @@ app/
 
 Components are organized by feature/domain.
 
-```
+```text
 components/
 ├── common/
 │   ├── forms/
@@ -131,7 +131,7 @@ components/
 
 ### Constants
 
-```
+```text
 constants/
 └── schemas/    # Zod validation schemas
 ```
@@ -140,7 +140,7 @@ Contains Zod schemas for form validation and data validation across the applicat
 
 ### Hooks
 
-```
+```text
 hooks/          # Custom React hooks
 ```
 
@@ -148,7 +148,7 @@ Custom hooks for shared logic, data fetching, and state management.
 
 ### Lib
 
-```
+```text
 lib/
 └── stores/     # Zustand state stores
 ```
@@ -157,7 +157,7 @@ Core application logic and Zustand stores for global state management.
 
 ### Providers
 
-```
+```text
 providers/      # React context providers
 ```
 
@@ -165,7 +165,7 @@ Context providers for Convex, Clerk, theming, and other global concerns.
 
 ### Utils
 
-```
+```text
 utils/          # Utility functions
 ```
 
@@ -173,7 +173,7 @@ Helper functions, formatters, and shared utilities.
 
 ### Assets
 
-```
+```text
 assets/
 └── navet/      # Navet-specific assets
 ```
@@ -215,7 +215,7 @@ Bifrost depends on shared workspace packages:
 "@workspace/shared"        // Shared types and utilities
 "@workspace/ui"            // Shared UI components
 "@workspace/typescript-config"  // Shared TypeScript config
-```
+```text
 
 <Note>
   These packages are part of the Yggdrasil monorepo and enable code sharing across applications.
