@@ -1,0 +1,362 @@
+---
+title: Environment Variables
+description: Configuration guide for all required and optional environment variables in Yggdrasil
+---
+
+## Overview
+
+Yggdrasil requires several environment variables to function correctly. These variables configure authentication, database connections, email services, and monitoring tools.
+
+<Warning>
+  Never commit `.env` files to version control. The `.gitignore` file is configured to exclude these files.
+</Warning>
+
+## Required Environment Variables
+
+These environment variables are required for the build process and runtime, as defined in `turbo.json`:
+
+### Clerk (Authentication)
+
+<ParamField path="NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY" type="string" required>
+  The publishable key for Clerk authentication. This is safe to expose to the client.
+  
+  ```bash
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+  ```
+</ParamField>
+
+<ParamField path="CLERK_SECRET_KEY" type="string" required>
+  The secret key for Clerk authentication. Keep this secure and never expose it to the client.
+  
+  ```bash
+  CLERK_SECRET_KEY=sk_test_...
+  ```
+</ParamField>
+
+### Convex (Database)
+
+<ParamField path="NEXT_PUBLIC_CONVEX_URL" type="string" required>
+  The full URL to your Convex deployment.
+  
+  ```bash
+  NEXT_PUBLIC_CONVEX_URL=https://your-deployment.convex.cloud
+  ```
+</ParamField>
+
+<ParamField path="NEXT_PUBLIC_CONVEX_HOSTNAME" type="string" required>
+  The hostname of your Convex deployment (without protocol).
+  
+  ```bash
+  NEXT_PUBLIC_CONVEX_HOSTNAME=your-deployment.convex.cloud
+  ```
+</ParamField>
+
+<ParamField path="CONVEX_DEPLOY_KEY" type="string" required>
+  Deployment key for Convex, used during the build process.
+  
+  ```bash
+  CONVEX_DEPLOY_KEY=prod:...
+  ```
+</ParamField>
+
+### Resend (Email Service)
+
+<ParamField path="RESEND_API_KEY" type="string" required>
+  API key for the Resend email service.
+  
+  ```bash
+  RESEND_API_KEY=re_...
+  ```
+</ParamField>
+
+### Sentry (Error Tracking)
+
+<ParamField path="SENTRY_AUTH_TOKEN" type="string" required>
+  Authentication token for Sentry error tracking and monitoring.
+  
+  ```bash
+  SENTRY_AUTH_TOKEN=sntrys_...
+  ```
+</ParamField>
+
+## Environment File Structure
+
+Yggdrasil uses multiple environment files across the monorepo:
+
+```
+yggdrasil/
+├── .env                    # Root-level environment variables
+├── .env.local              # Local overrides (gitignored)
+├── apps/
+│   ├── bifrost/
+│   │   ├── .env           # Bifrost-specific variables
+│   │   └── .env.local     # Local overrides
+│   ├── midgard/
+│   │   ├── .env           # Midgard-specific variables
+│   │   └── .env.local     # Local overrides
+│   └── hugin/
+│       ├── .env           # Hugin-specific variables
+│       └── .env.local     # Local overrides
+```
+
+<Note>
+  Turborepo automatically watches `.env` and `.env.local` files as specified in `turbo.json` under `globalDependencies` and `dev` task inputs.
+</Note>
+
+## Setting Up Environment Variables
+
+<Steps>
+  <Step title="Create root .env file">
+    Create a `.env` file in the root of the monorepo:
+    
+    ```bash
+    touch .env
+    ```
+  </Step>
+
+  <Step title="Add global variables">
+    Add variables that are shared across all apps:
+    
+    ```bash
+    # Clerk Authentication
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+    CLERK_SECRET_KEY=sk_test_...
+    
+    # Convex Database
+    NEXT_PUBLIC_CONVEX_URL=https://your-deployment.convex.cloud
+    NEXT_PUBLIC_CONVEX_HOSTNAME=your-deployment.convex.cloud
+    CONVEX_DEPLOY_KEY=prod:...
+    
+    # Resend Email
+    RESEND_API_KEY=re_...
+    
+    # Sentry Monitoring
+    SENTRY_AUTH_TOKEN=sntrys_...
+    ```
+  </Step>
+
+  <Step title="Create app-specific .env files (if needed)">
+    If an app requires additional environment variables, create a `.env` file in that app's directory:
+    
+    ```bash
+    cd apps/midgard
+    touch .env
+    ```
+  </Step>
+
+  <Step title="Create .env.local for local overrides">
+    For local development overrides that shouldn't be shared:
+    
+    ```bash
+    touch .env.local
+    ```
+    
+    <Warning>
+      `.env.local` files are automatically ignored by git and should contain sensitive or machine-specific values.
+    </Warning>
+  </Step>
+</Steps>
+
+## Environment Variable Templates
+
+### Development Template
+
+For local development:
+
+```bash .env.development
+# Clerk Authentication (Development)
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
+
+# Convex Database (Development)
+NEXT_PUBLIC_CONVEX_URL=https://your-dev-deployment.convex.cloud
+NEXT_PUBLIC_CONVEX_HOSTNAME=your-dev-deployment.convex.cloud
+CONVEX_DEPLOY_KEY=dev:...
+
+# Resend Email (Development)
+RESEND_API_KEY=re_...
+
+# Sentry Monitoring (Development)
+SENTRY_AUTH_TOKEN=sntrys_...
+```
+
+### Production Template
+
+For production deployment:
+
+```bash .env.production
+# Clerk Authentication (Production)
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_...
+CLERK_SECRET_KEY=sk_live_...
+
+# Convex Database (Production)
+NEXT_PUBLIC_CONVEX_URL=https://your-prod-deployment.convex.cloud
+NEXT_PUBLIC_CONVEX_HOSTNAME=your-prod-deployment.convex.cloud
+CONVEX_DEPLOY_KEY=prod:...
+
+# Resend Email (Production)
+RESEND_API_KEY=re_...
+
+# Sentry Monitoring (Production)
+SENTRY_AUTH_TOKEN=sntrys_...
+```
+
+## Getting API Keys
+
+### Clerk Setup
+
+<Steps>
+  <Step title="Create Clerk account">
+    Sign up at [clerk.com](https://clerk.com)
+  </Step>
+
+  <Step title="Create application">
+    Create a new application in the Clerk dashboard
+  </Step>
+
+  <Step title="Copy API keys">
+    Navigate to **API Keys** and copy:
+    - Publishable Key → `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
+    - Secret Key → `CLERK_SECRET_KEY`
+  </Step>
+</Steps>
+
+### Convex Setup
+
+<Steps>
+  <Step title="Create Convex account">
+    Sign up at [convex.dev](https://convex.dev)
+  </Step>
+
+  <Step title="Create project">
+    Create a new project in the Convex dashboard
+  </Step>
+
+  <Step title="Get deployment URL">
+    Copy your deployment URL:
+    - Full URL → `NEXT_PUBLIC_CONVEX_URL`
+    - Hostname only → `NEXT_PUBLIC_CONVEX_HOSTNAME`
+  </Step>
+
+  <Step title="Generate deploy key">
+    Navigate to **Settings** → **Deploy Keys** and generate a new key → `CONVEX_DEPLOY_KEY`
+  </Step>
+</Steps>
+
+### Resend Setup
+
+<Steps>
+  <Step title="Create Resend account">
+    Sign up at [resend.com](https://resend.com)
+  </Step>
+
+  <Step title="Generate API key">
+    Navigate to **API Keys** and create a new key → `RESEND_API_KEY`
+  </Step>
+</Steps>
+
+### Sentry Setup
+
+<Steps>
+  <Step title="Create Sentry account">
+    Sign up at [sentry.io](https://sentry.io)
+  </Step>
+
+  <Step title="Create project">
+    Create a new Next.js project in Sentry
+  </Step>
+
+  <Step title="Generate auth token">
+    Navigate to **Settings** → **Auth Tokens** and create a new token → `SENTRY_AUTH_TOKEN`
+  </Step>
+</Steps>
+
+## Environment Variable Loading
+
+Next.js loads environment variables in the following order (from highest to lowest priority):
+
+1. `.env.local` - Local overrides (not committed to git)
+2. `.env.[NODE_ENV]` - Environment-specific files (`.env.development`, `.env.production`)
+3. `.env` - Base configuration
+
+<Note>
+  Variables prefixed with `NEXT_PUBLIC_` are embedded into the browser bundle and are accessible on the client side.
+</Note>
+
+## Validation
+
+To verify your environment variables are set correctly:
+
+<CodeGroup>
+```bash Check Build Variables
+pnpm build
+```
+
+```bash Check Dev Variables
+pnpm dev
+```
+</CodeGroup>
+
+If any required variables are missing, you'll see an error during the build or startup process:
+
+```bash
+Error: Missing environment variable: NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+```
+
+## Security Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Never Commit Secrets" icon="shield-halved">
+    Always add `.env*` to `.gitignore` and never commit sensitive values
+  </Card>
+  <Card title="Use Different Keys" icon="key">
+    Use separate API keys for development and production environments
+  </Card>
+  <Card title="Rotate Regularly" icon="rotate">
+    Regularly rotate API keys and secrets, especially if compromised
+  </Card>
+  <Card title="Limit Permissions" icon="lock">
+    Grant API keys only the minimum required permissions
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+### Variables Not Loading
+
+If environment variables aren't being recognized:
+
+1. Ensure the file is named correctly (`.env`, not `env.txt`)
+2. Restart the development server after changing variables
+3. Check that variables are not commented out with `#`
+4. Verify there are no spaces around the `=` sign
+
+### Build Failures
+
+If builds fail due to missing variables:
+
+```bash
+# Check which variables Turborepo expects
+cat turbo.json | grep -A 10 '"env"'
+```
+
+Ensure all variables listed in the `build` task's `env` array are set.
+
+### NEXT_PUBLIC_ Variables Not Available
+
+If client-side variables aren't accessible:
+
+1. Ensure they're prefixed with `NEXT_PUBLIC_`
+2. Restart the development server
+3. Clear Next.js cache: `rm -rf .next`
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Available Commands" icon="terminal" href="/development/commands">
+    Learn about all available scripts and commands
+  </Card>
+  <Card title="Development Setup" icon="wrench" href="/development/setup">
+    Complete local development setup
+  </Card>
+</CardGroup>

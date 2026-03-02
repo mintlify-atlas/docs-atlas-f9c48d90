@@ -1,0 +1,590 @@
+---
+title: Available Commands
+description: Complete reference of all npm scripts and commands available in Yggdrasil
+---
+
+## Overview
+
+Yggdrasil uses **pnpm** workspaces and **Turborepo** to manage commands across the monorepo. This page documents all available scripts at both the root level and individual app level.
+
+## Root Level Commands
+
+Run these commands from the root of the monorepo:
+
+### Development
+
+<ParamField path="pnpm dev" type="command">
+  Start the development server for all apps simultaneously.
+  
+  ```bash
+  pnpm dev
+  ```
+  
+  This will start:
+  - **Midgard** on `http://localhost:3000`
+  - **Bifrost** on `http://localhost:3001`
+  - **Hugin** on `http://localhost:3003`
+  
+  <Note>
+    Uses Turbopack for fast hot module replacement (HMR).
+  </Note>
+</ParamField>
+
+### Build
+
+<ParamField path="pnpm build" type="command">
+  Build all apps and packages for production.
+  
+  ```bash
+  pnpm build
+  ```
+  
+  Turborepo will:
+  - Build dependencies first (packages)
+  - Build apps in parallel where possible
+  - Cache build outputs for faster subsequent builds
+  - Output optimized bundles to `.next/` directories
+</ParamField>
+
+### Code Quality
+
+<CodeGroup>
+```bash Check All Files
+pnpm check:all
+```
+
+```bash Fix All Files
+pnpm check:all:fix
+```
+
+```bash Check Workspace
+pnpm check
+```
+
+```bash Fix Workspace
+pnpm check:fix
+```
+</CodeGroup>
+
+<ParamField path="pnpm check:all" type="command">
+  Run Biome checks on all files in the monorepo.
+  
+  ```bash
+  pnpm check:all
+  ```
+  
+  Equivalent to: `biome check .`
+</ParamField>
+
+<ParamField path="pnpm check:all:fix" type="command">
+  Run Biome checks and automatically fix issues across all files.
+  
+  ```bash
+  pnpm check:all:fix
+  ```
+  
+  Equivalent to: `biome check . --write`
+</ParamField>
+
+<ParamField path="pnpm check" type="command">
+  Run Biome checks on workspace packages (uses Turborepo).
+  
+  ```bash
+  pnpm check
+  ```
+</ParamField>
+
+<ParamField path="pnpm check:fix" type="command">
+  Run Biome checks and fix issues on workspace packages (uses Turborepo).
+  
+  ```bash
+  pnpm check:fix
+  ```
+  
+  <Note>
+    This command is not cached by Turborepo to ensure fresh checks.
+  </Note>
+</ParamField>
+
+### Linting
+
+<ParamField path="pnpm lint" type="command">
+  Run Next.js linting across all apps.
+  
+  ```bash
+  pnpm lint
+  ```
+</ParamField>
+
+### Legacy Format Commands
+
+<Warning>
+  These commands are aliases for the `check` commands and may be deprecated in future versions.
+</Warning>
+
+<CodeGroup>
+```bash Format and Lint
+pnpm format-and-lint
+```
+
+```bash Format and Lint Fix
+pnpm format-and-lint:fix
+```
+</CodeGroup>
+
+## App-Specific Commands
+
+Each app (Bifrost, Midgard, Hugin) has its own set of commands. You can run these using pnpm's filter flag:
+
+```bash
+pnpm --filter <app-name> <command>
+```
+
+### Bifrost Commands
+
+<CodeGroup>
+```bash Development
+pnpm --filter bifrost dev
+```
+
+```bash Build
+pnpm --filter bifrost build
+```
+
+```bash Production Server
+pnpm --filter bifrost start
+```
+
+```bash Lint
+pnpm --filter bifrost lint
+```
+
+```bash Check
+pnpm --filter bifrost check
+```
+
+```bash Check and Fix
+pnpm --filter bifrost check:fix
+```
+</CodeGroup>
+
+<ParamField path="pnpm --filter bifrost dev" type="command">
+  Start Bifrost development server on port 3001.
+  
+  ```bash
+  pnpm --filter bifrost dev
+  ```
+  
+  Uses Next.js with Turbopack: `next dev --turbopack -p 3001`
+</ParamField>
+
+<ParamField path="pnpm --filter bifrost build" type="command">
+  Build Bifrost for production.
+  
+  ```bash
+  pnpm --filter bifrost build
+  ```
+  
+  Creates optimized production build in `.next/`
+</ParamField>
+
+<ParamField path="pnpm --filter bifrost start" type="command">
+  Start Bifrost production server.
+  
+  ```bash
+  pnpm --filter bifrost start
+  ```
+  
+  <Note>
+    Requires running `build` first. Serves the production build.
+  </Note>
+</ParamField>
+
+### Midgard Commands
+
+<CodeGroup>
+```bash Development
+pnpm --filter midgard dev
+```
+
+```bash Build
+pnpm --filter midgard build
+```
+
+```bash Production Server
+pnpm --filter midgard start
+```
+
+```bash Lint
+pnpm --filter midgard lint
+```
+
+```bash Check
+pnpm --filter midgard check
+```
+
+```bash Check and Fix
+pnpm --filter midgard check:fix
+```
+</CodeGroup>
+
+<ParamField path="pnpm --filter midgard dev" type="command">
+  Start Midgard development server on port 3000.
+  
+  ```bash
+  pnpm --filter midgard dev
+  ```
+  
+  Uses Next.js with Turbopack: `next dev --turbopack -p 3000`
+</ParamField>
+
+<ParamField path="pnpm --filter midgard build" type="command">
+  Build Midgard for production.
+  
+  ```bash
+  pnpm --filter midgard build
+  ```
+  
+  Creates optimized production build in `.next/`
+</ParamField>
+
+<ParamField path="pnpm --filter midgard start" type="command">
+  Start Midgard production server.
+  
+  ```bash
+  pnpm --filter midgard start
+  ```
+  
+  <Note>
+    Requires running `build` first. Serves the production build.
+  </Note>
+</ParamField>
+
+### Hugin Commands
+
+<CodeGroup>
+```bash Development
+pnpm --filter hugin dev
+```
+
+```bash Build
+pnpm --filter hugin build
+```
+
+```bash Production Server
+pnpm --filter hugin start
+```
+
+```bash Lint
+pnpm --filter hugin lint
+```
+
+```bash Check
+pnpm --filter hugin check
+```
+
+```bash Check and Fix
+pnpm --filter hugin check:fix
+```
+</CodeGroup>
+
+<ParamField path="pnpm --filter hugin dev" type="command">
+  Start Hugin development server on port 3003.
+  
+  ```bash
+  pnpm --filter hugin dev
+  ```
+  
+  Uses Next.js with Turbopack: `next dev --turbopack -p 3003`
+</ParamField>
+
+<ParamField path="pnpm --filter hugin build" type="command">
+  Build Hugin for production.
+  
+  ```bash
+  pnpm --filter hugin build
+  ```
+  
+  Creates optimized production build in `.next/`
+</ParamField>
+
+<ParamField path="pnpm --filter hugin start" type="command">
+  Start Hugin production server.
+  
+  ```bash
+  pnpm --filter hugin start
+  ```
+  
+  <Note>
+    Requires running `build` first. Serves the production build.
+  </Note>
+</ParamField>
+
+## Turborepo Features
+
+### Caching
+
+Turborepo automatically caches task outputs to speed up subsequent runs:
+
+```bash
+# First build - runs all tasks
+pnpm build
+
+# Second build - uses cache (instant)
+pnpm build
+```
+
+<Note>
+  Turborepo detects file changes and only rebuilds what's necessary. Cache is stored in `node_modules/.cache/turbo`.
+</Note>
+
+### Parallel Execution
+
+Turborepo runs tasks in parallel when possible:
+
+```bash
+# Runs dev servers for all apps in parallel
+pnpm dev
+```
+
+### Task Dependencies
+
+Turborepo respects task dependencies defined in `turbo.json`:
+
+```json turbo.json
+{
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"]
+    }
+  }
+}
+```
+
+This ensures packages are built before apps that depend on them.
+
+## Advanced Usage
+
+### Running Multiple Apps
+
+<CodeGroup>
+```bash Midgard + Bifrost
+pnpm --filter midgard --filter bifrost dev
+```
+
+```bash Specific Package Pattern
+pnpm --filter "@workspace/*" build
+```
+</CodeGroup>
+
+### Custom Port
+
+Run an app on a custom port:
+
+```bash
+pnpm --filter midgard dev -- -p 3005
+```
+
+### Clearing Cache
+
+<CodeGroup>
+```bash Clear Turborepo Cache
+rm -rf node_modules/.cache/turbo
+```
+
+```bash Clear Next.js Cache
+rm -rf apps/*/. next
+```
+
+```bash Clear All Caches
+pnpm clean
+```
+</CodeGroup>
+
+### Verbose Output
+
+See detailed Turborepo logs:
+
+```bash
+pnpm build --verbose
+```
+
+### Force Rebuild
+
+Force Turborepo to ignore cache:
+
+```bash
+pnpm build --force
+```
+
+## Common Workflows
+
+### Daily Development
+
+```bash
+# Pull latest changes
+git pull
+
+# Install dependencies
+pnpm install
+
+# Start development
+pnpm dev
+```
+
+### Before Committing
+
+```bash
+# Check and fix code quality
+pnpm check:all:fix
+
+# Run linting
+pnpm lint
+
+# Build to verify
+pnpm build
+```
+
+### Production Build Test
+
+```bash
+# Build all apps
+pnpm build
+
+# Start production servers
+pnpm --filter midgard start
+pnpm --filter bifrost start
+pnpm --filter hugin start
+```
+
+## Package Manager Commands
+
+### Installing Dependencies
+
+<CodeGroup>
+```bash Install All
+pnpm install
+```
+
+```bash Add to Root
+pnpm add -w <package>
+```
+
+```bash Add to Specific App
+pnpm --filter midgard add <package>
+```
+
+```bash Add Dev Dependency
+pnpm --filter bifrost add -D <package>
+```
+</CodeGroup>
+
+### Removing Dependencies
+
+<CodeGroup>
+```bash Remove from Specific App
+pnpm --filter midgard remove <package>
+```
+
+```bash Remove from Root
+pnpm remove -w <package>
+```
+</CodeGroup>
+
+### Updating Dependencies
+
+<CodeGroup>
+```bash Update All
+pnpm update
+```
+
+```bash Update Specific Package
+pnpm update <package>
+```
+
+```bash Update Interactive
+pnpm update --interactive
+```
+</CodeGroup>
+
+## Command Reference Table
+
+| Command | Description | Scope | Cached |
+|---------|-------------|-------|--------|
+| `pnpm dev` | Start development servers | All apps | No |
+| `pnpm build` | Build for production | All apps | Yes |
+| `pnpm lint` | Run Next.js linting | All apps | Yes |
+| `pnpm check` | Run Biome checks | Workspace | Yes |
+| `pnpm check:fix` | Fix Biome issues | Workspace | No |
+| `pnpm check:all` | Check all files | Monorepo | Yes |
+| `pnpm check:all:fix` | Fix all files | Monorepo | No |
+
+## Troubleshooting
+
+### Command Not Found
+
+If a command isn't recognized:
+
+```bash
+# Verify pnpm is installed
+pnpm --version
+
+# Check package.json for available scripts
+cat package.json | grep scripts -A 10
+```
+
+### Port Already in Use
+
+```bash
+# Find process using port
+lsof -ti:3000
+
+# Kill process
+lsof -ti:3000 | xargs kill -9
+
+# Or use a different port
+pnpm --filter midgard dev -- -p 3005
+```
+
+### Build Failures
+
+```bash
+# Clear all caches
+rm -rf node_modules/.cache
+rm -rf apps/*/.next
+
+# Reinstall dependencies
+rm -rf node_modules
+pnpm install
+
+# Force rebuild
+pnpm build --force
+```
+
+### Turbopack Issues
+
+If Turbopack causes problems, you can disable it:
+
+```bash
+# In app's package.json, change:
+"dev": "next dev --turbopack -p 3000"
+# to:
+"dev": "next dev -p 3000"
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Development Setup" icon="wrench" href="/development/setup">
+    Complete development environment setup guide
+  </Card>
+  <Card title="Environment Variables" icon="key" href="/development/environment">
+    Configure required environment variables
+  </Card>
+  <Card title="Contributing" icon="code-pull-request" href="/contributing/guide">
+    Learn how to contribute to Yggdrasil
+  </Card>
+  <Card title="Architecture" icon="sitemap" href="/architecture">
+    Understand the system architecture
+  </Card>
+</CardGroup>

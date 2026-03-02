@@ -1,0 +1,229 @@
+---
+title: Shared Package
+description: Core constants and utilities used across the workspace
+---
+
+The `@workspace/shared` package provides shared constants and utility functions used throughout the application. This package ensures consistency across different parts of the codebase by centralizing common values and helper functions.
+
+## Installation
+
+The package is available as a workspace dependency:
+
+```json
+{
+  "dependencies": {
+    "@workspace/shared": "workspace:*"
+  }
+}
+```
+
+## Exports
+
+The package has two main export paths:
+
+- `@workspace/shared/constants` - Application-wide constants
+- `@workspace/shared/utils` - Utility functions
+
+## Constants
+
+The package exports several constant arrays and types used throughout the application.
+
+### Access Rights
+
+Defines the available access levels in the system:
+
+```typescript
+import { ACCESS_RIGHTS } from "@workspace/shared/constants";
+
+// Available access levels
+const levels = ACCESS_RIGHTS; // ["super-admin", "admin", "editor", "internal"]
+```
+
+### Degree Types
+
+Defines the types of academic degrees:
+
+```typescript
+import { DEGREE_TYPES } from "@workspace/shared/constants";
+
+const degrees = DEGREE_TYPES; // ["Årsstudium", "Bachelor", "Master", "PhD"]
+```
+
+### Job Types
+
+Defines employment types for job postings:
+
+```typescript
+import { JOB_TYPES } from "@workspace/shared/constants";
+
+const types = JOB_TYPES; // ["Fulltid", "Deltid", "Internship", "Sommerjobb"]
+```
+
+### Study Programs
+
+Defines the available study programs at the institution:
+
+```typescript
+import { STUDY_PROGRAMS } from "@workspace/shared/constants";
+
+const programs = STUDY_PROGRAMS;
+// Includes programs like:
+// - "Informatikk: programmering og systemarkitektur"
+// - "Informatikk: design, bruk og interaksjon"
+// - "Data science"
+// And many more...
+```
+
+### Organizer Roles
+
+Type definition for event organizer roles:
+
+```typescript
+import type { ORGANIZER_ROLE } from "@workspace/shared/constants";
+
+const role: ORGANIZER_ROLE = "hovedansvarlig"; // or "medhjelper"
+```
+
+## Utilities
+
+The package provides several utility functions for common operations.
+
+### Base64 Encoding/Decoding
+
+Functions for encoding and decoding base64 strings:
+
+```typescript
+import { toBase64, fromBase64 } from "@workspace/shared/utils";
+
+const encoded = toBase64("Hello, World!");
+const decoded = fromBase64(encoded);
+```
+
+<CodeGroup>
+
+```typescript toBase64
+export function toBase64(text: string): string {
+  return btoa(encodeURIComponent(text));
+}
+```
+
+```typescript fromBase64
+export function fromBase64(text: string): string {
+  return decodeURIComponent(atob(text));
+}
+```
+
+</CodeGroup>
+
+### Date Formatting
+
+Utilities for formatting dates in Norwegian locale with Oslo timezone:
+
+```typescript
+import {
+  humanReadableDate,
+  humanReadableTime,
+  humanReadableDateTime,
+} from "@workspace/shared/utils";
+
+const date = new Date();
+
+// Format: "mandag, des. 25"
+const dateStr = humanReadableDate(date);
+
+// Format: "14:30"
+const timeStr = humanReadableTime(date);
+
+// Format: "mandag, desember 25, 14:30"
+const dateTimeStr = humanReadableDateTime(date);
+```
+
+<CodeGroup>
+
+```typescript humanReadableDate
+export const humanReadableDate = (date: Date): string =>
+  date.toLocaleDateString("no", {
+    weekday: "long",
+    month: "short",
+    day: "numeric",
+    timeZone: "Europe/Oslo",
+  });
+```
+
+```typescript humanReadableTime
+export const humanReadableTime = (date: Date): string =>
+  date.toLocaleTimeString("no", {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Europe/Oslo",
+  });
+```
+
+```typescript humanReadableDateTime
+export const humanReadableDateTime = (date: Date): string =>
+  date.toLocaleString("no", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Europe/Oslo",
+  });
+```
+
+</CodeGroup>
+
+### Variable Name Conversion
+
+Converts strings to valid variable names:
+
+```typescript
+import { toVariableName } from "@workspace/shared/utils";
+
+const varName = toVariableName("Hello World!");
+// Returns: "Hello_World_"
+
+const withNorwegian = toVariableName("Informatikk: design");
+// Returns: "Informatikk__design"
+```
+
+```typescript
+export function toVariableName(name: string): string {
+  return name.replaceAll(/[^a-zA-ZæøåÆØÅ0-9]/g, "_");
+}
+```
+
+<Note>
+This function preserves Norwegian characters (æ, ø, å) while replacing all other non-alphanumeric characters with underscores.
+</Note>
+
+## Dependencies
+
+The package depends on:
+
+- `@clerk/nextjs` - For authentication types
+- `convex` - For Convex integration types
+
+## Usage Example
+
+Here's a complete example using multiple exports from the package:
+
+```typescript
+import { ACCESS_RIGHTS, DEGREE_TYPES, STUDY_PROGRAMS } from "@workspace/shared/constants";
+import { humanReadableDate, toVariableName } from "@workspace/shared/utils";
+
+// Check if a user has admin access
+function isAdmin(userRole: string): boolean {
+  return ACCESS_RIGHTS.slice(0, 2).includes(userRole as any);
+}
+
+// Format event date
+function formatEventDate(date: Date): string {
+  return humanReadableDate(date);
+}
+
+// Generate a slug from program name
+function generateProgramSlug(program: typeof STUDY_PROGRAMS[number]): string {
+  return toVariableName(program).toLowerCase();
+}
+```

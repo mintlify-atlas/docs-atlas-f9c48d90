@@ -1,0 +1,273 @@
+---
+title: "Clerk Integration"
+description: "Authentication setup using Clerk and Convex"
+---
+
+The application uses [Clerk](https://clerk.com) for authentication, integrated with Convex for backend user management. This setup provides secure JWT-based authentication with automatic user synchronization.
+
+## Architecture Overview
+
+The authentication flow consists of three main components:
+
+1. **Clerk** - Handles user authentication and issues JWT tokens
+2. **Convex Auth Config** - Validates Clerk tokens for Convex queries/mutations
+3. **Webhook Handler** - Synchronizes user data between Clerk and Convex database
+
+## Convex Configuration
+
+The Convex backend is configured to accept Clerk authentication tokens through the `auth.config.js` file:
+
+```javascript packages/backend/convex/auth.config.js
+export default {
+  providers: [
+    {
+      domain: process.env.CLERK_FRONTEND_API_URL,
+      applicationID: "convex",
+    },
+  ],
+};
+```
+
+<Info>
+The `applicationID` must match the JWT template name configured in your Clerk dashboard. The default template name is "convex".
+</Info>
+
+### Required Environment Variables
+
+- `CLERK_FRONTEND_API_URL` - Your Clerk frontend API URL
+- `CLERK_WEBHOOK_SECRET` - Secret for verifying webhook signatures
+
+## User Synchronization
+
+User data is automatically synchronized from Clerk to the Convex database via webhooks.
+
+### Webhook Endpoint
+
+The webhook handler is defined in `convex/http.ts` and responds to Clerk user events:
+
+```typescript packages/backend/convex/http.ts
+http.route({
+  path: "/clerk-users-webhook",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    const event = await validateRequest(request);
+    if (!event) {
+      return new Response("Error occured", { status: 400 });
+    }
+    switch (event.type) {
+      case "user.created": // intentional fallthrough
+      case "user.updated":
+        await ctx.runMutation(internal.users.upsertFromClerk, {
+          data: event.data,
+        });
+        break;
+
+      case "user.deleted": {
+        const clerkUserId = event.data.id;
+        if (!clerkUserId) {
+          console.error("Missing user ID in delete event");
+          break;
+        }
+        await ctx.runMutation(internal.users.deleteFromClerk, { clerkUserId });
+        break;
+      }
+      default:
+        console.log("Ignored Clerk webhook event", event.type);
+    }
+
+    return new Response(null, { status: 200 });
+  }),
+});
+```
+
+### Webhook Security
+
+Webhook requests are validated using Svix signatures to ensure they originate from Clerk:
+
+```typescript packages/backend/convex/http.ts
+async function validateRequest(req: Request): Promise<WebhookEvent | null> {
+  const payloadString = await req.text();
+  const svixId = req.headers.get("svix-id");
+  const svixTimestamp = req.headers.get("svix-timestamp");
+  const svixSignature = req.headers.get("svix-signature");
+  const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
+
+  if (!svixId || !svixTimestamp || !svixSignature || !webhookSecret) {
+    console.error("Missing required webhook headers or secret");
+    return null;
+  }
+
+  const svixHeaders = {
+    "svix-id": svixId,
+    "svix-timestamp": svixTimestamp,
+    "svix-signature": svixSignature,
+  };
+  const wh = new Webhook(webhookSecret);
+  try {
+    return wh.verify(payloadString, svixHeaders) as unknown as WebhookEvent;
+  } catch (error) {
+    console.error("Error verifying webhook event", error);
+    return null;
+  }
+}
+```
+
+<Warning>
+Always validate webhook signatures to prevent unauthorized access. Never skip signature verification in production.
+</Warning>
+
+### User Data Mapping
+
+Clerk user data is mapped to the Convex user schema:
+
+```typescript packages/backend/convex/users.ts
+export const upsertFromClerk = internalMutation({
+  args: { data: v.any() as Validator<UserJSON> },
+  async handler(ctx, { data }) {
+    const email = data.email_addresses.find(
+      (emailAddress) => emailAddress.id === data.primary_email_address_id,
+    )?.email_address;
+    const userAttributes = {
+      email: email ?? data.email_addresses[0]?.email_address ?? "",
+      firstName: data.first_name ?? "",
+      lastName: data.last_name ?? "",
+      image: data.image_url ?? "",
+      externalId: data.id,
+      locked: data.locked,
+    };
+
+    const user = await userByExternalId(ctx, data.id);
+    if (user === null) {
+      await ctx.db.insert("users", userAttributes);
+    } else {
+      await ctx.db.patch(user._id, userAttributes);
+    }
+  },
+});
+```
+
+## Getting the Current User
+
+Retrieve the authenticated user in Convex queries and mutations:
+
+```typescript packages/backend/convex/users.ts
+export async function getCurrentUser(ctx: QueryCtx) {
+  const identity = await ctx.auth.getUserIdentity();
+  if (identity === null) {
+    return null;
+  }
+  return await userByExternalId(ctx, identity.subject);
+}
+
+export async function getCurrentUserOrThrow(ctx: QueryCtx) {
+  const userRecord = await getCurrentUser(ctx);
+  if (!userRecord) throw new Error("Can't get current user");
+  return userRecord;
+}
+```
+
+### Usage in Queries
+
+```typescript
+import { getCurrentUser } from "./users";
+
+export const myQuery = query({
+  handler: async (ctx) => {
+    const user = await getCurrentUser(ctx);
+    if (!user) {
+      throw new Error("Unauthorized");
+    }
+    // Use user data
+    return { userId: user._id, email: user.email };
+  },
+});
+```
+
+## Auth Package Utilities
+
+The `@workspace/auth` package provides helper functions for Next.js server components and API routes:
+
+### Getting Auth Tokens
+
+```typescript packages/auth/authToken.ts
+import { auth } from "@clerk/nextjs/server";
+
+export async function getAuthToken() {
+  return (await (await auth()).getToken({ template: "convex" })) ?? undefined;
+}
+```
+
+### Usage in Server Components
+
+```typescript
+import { getAuthToken } from "@workspace/auth";
+import { fetchQuery } from "convex/nextjs";
+import { api } from "@workspace/backend/convex/api";
+
+export default async function MyComponent() {
+  const token = await getAuthToken();
+  const data = await fetchQuery(api.myQuery.get, {}, { token });
+  
+  return <div>{data}</div>;
+}
+```
+
+<Info>
+The auth token must be passed to Convex queries when called from Next.js server components to authenticate the request.
+</Info>
+
+## User Schema
+
+The users table in Convex stores synchronized user data:
+
+```typescript packages/backend/convex/schema.ts
+users: defineTable({
+  email: v.string(),
+  firstName: v.string(),
+  lastName: v.string(),
+  image: v.string(),
+  externalId: v.string(),
+  locked: v.boolean(),
+})
+  .index("by_ExternalId", ["externalId"])
+  .searchIndex("search_email", {
+    searchField: "email",
+  }),
+```
+
+### Field Descriptions
+
+- `email` - Primary email address from Clerk
+- `firstName` - User's first name
+- `lastName` - User's last name
+- `image` - Profile image URL
+- `externalId` - Clerk user ID (used for synchronization)
+- `locked` - Account lock status from Clerk
+
+## Setup Checklist
+
+<Steps>
+  <Step title="Configure Clerk">
+    Create a Clerk application and obtain your API keys
+  </Step>
+  
+  <Step title="Create JWT Template">
+    In Clerk dashboard, create a JWT template named "convex" with your Convex deployment URL as the issuer
+  </Step>
+  
+  <Step title="Set Environment Variables">
+    Add `CLERK_FRONTEND_API_URL` and `CLERK_WEBHOOK_SECRET` to your environment
+  </Step>
+  
+  <Step title="Deploy Webhook Endpoint">
+    Deploy your Convex functions to expose the `/clerk-users-webhook` endpoint
+  </Step>
+  
+  <Step title="Configure Webhook in Clerk">
+    Add your Convex HTTP endpoint URL to Clerk webhooks and subscribe to user events
+  </Step>
+</Steps>
+
+<Note>
+Make sure to test the webhook integration by creating a test user in Clerk and verifying it appears in your Convex database.
+</Note>

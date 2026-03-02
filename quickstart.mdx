@@ -1,80 +1,223 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quickstart
+description: Get Yggdrasil running locally in minutes
 ---
 
-## Get started in three steps
+## Prerequisites
 
-Get your documentation site running locally and make your first customization.
+Before you begin, ensure you have the following installed:
 
-### Step 1: Set up your local environment
-
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
-
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
-
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 3: Go live
-
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
-
-## Next steps
-
-Now that you have your docs running, explore these key features:
-
-<CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
-</CardGroup>
+- **[Node.js](https://nodejs.org/)** v20 or later
+- **[pnpm](https://pnpm.io/)** v10.22.0 (the project's package manager)
+- **Git** for cloning the repository
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+  The project uses pnpm workspaces and requires Node.js 20+. Make sure you have the correct versions installed.
 </Note>
+
+## Installation
+
+<Steps>
+  <Step title="Clone the repository">
+    Clone the Yggdrasil monorepo from GitHub:
+
+    ```bash
+    git clone https://github.com/ifinavet/yggdrasil.git
+    cd yggdrasil
+    ```
+  </Step>
+
+  <Step title="Install dependencies">
+    Install all dependencies for the monorepo using pnpm:
+
+    ```bash
+    pnpm install
+    ```
+
+    This will install dependencies for all apps and packages in the monorepo.
+  </Step>
+
+  <Step title="Set up environment variables">
+    Each application requires its own environment variables. Create `.env.local` files in the respective app directories:
+
+    <CodeGroup>
+      ```bash Bifrost (Admin Dashboard)
+      cd apps/bifrost
+      cp .env.example .env.local
+      ```
+
+      ```bash Midgard (Main Website)
+      cd apps/midgard
+      cp .env.example .env.local
+      ```
+    </CodeGroup>
+
+    <Info>
+      **Authentication Required**: The project currently uses Clerk for authentication. You'll need to create a Clerk account and add your API keys to the `.env.local` files. The team is assessing alternatives for future releases.
+    </Info>
+
+    Required environment variables include:
+
+    - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - Your Clerk publishable key
+    - `CLERK_SECRET_KEY` - Your Clerk secret key
+    - `NEXT_PUBLIC_CONVEX_URL` - Your Convex deployment URL
+    - `NEXT_PUBLIC_CONVEX_HOSTNAME` - Your Convex hostname
+    - `CONVEX_DEPLOY_KEY` - Your Convex deployment key
+    - `RESEND_API_KEY` - Resend API key for email functionality
+  </Step>
+
+  <Step title="Run the development server">
+    Start the development servers for all applications using Turborepo:
+
+    ```bash
+    pnpm dev
+    ```
+
+    This will start:
+    - **Bifrost** at [http://localhost:3000](http://localhost:3000)
+    - **Midgard** at [http://localhost:3001](http://localhost:3001)
+
+    <Note>
+      For most contributions, you'll only need to run Convex and Midgard. Check the individual app READMEs for specific setup instructions.
+    </Note>
+  </Step>
+</Steps>
+
+## Working with Individual Apps
+
+You can also run individual applications instead of the entire monorepo:
+
+<CodeGroup>
+  ```bash Bifrost Only
+  cd apps/bifrost
+  pnpm dev
+  ```
+
+  ```bash Midgard Only
+  cd apps/midgard
+  pnpm dev
+  ```
+</CodeGroup>
+
+## Available Scripts
+
+The monorepo provides several scripts for development:
+
+| Script | Description |
+|--------|-------------|
+| `pnpm dev` | Start all apps in development mode |
+| `pnpm build` | Build all apps and packages |
+| `pnpm lint` | Run linting across the monorepo |
+| `pnpm check` | Run Biome checks on all files |
+| `pnpm check:fix` | Fix Biome issues automatically |
+| `pnpm check:all` | Run comprehensive checks |
+| `pnpm check:all:fix` | Fix all issues automatically |
+
+## Development Workflow
+
+<Steps>
+  <Step title="Create an issue">
+    Before contributing, create an issue describing what you want to work on. This helps the maintainers review and approve your proposal before you invest time in development.
+
+    Issues are assessed based on:
+    - Impact of the proposed change
+    - Size and scope of the work
+    - Contributor history
+  </Step>
+
+  <Step title="Get approval">
+    Wait for approval from either the `webansvarlig-ifinavet` account or the main maintainer's personal account.
+  </Step>
+
+  <Step title="Start development">
+    Once approved, read the `CONTRIBUTING.md` file for detailed contribution guidelines, then start working on your changes.
+  </Step>
+
+  <Step title="Submit a pull request">
+    When ready, create a PR following the guidelines in `CONTRIBUTING.md`. Request review from `webansvarlig-ifinavet` if not automatically assigned.
+  </Step>
+</Steps>
+
+## Common Development Tasks
+
+### Running Type Checks
+
+```bash
+turbo check-types
+```
+
+### Building for Production
+
+```bash
+pnpm build
+```
+
+### Formatting Code
+
+```bash
+pnpm check:all:fix
+```
+
+The project uses [Biome](https://biomejs.dev/) for linting and formatting, configured at the monorepo root.
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Node version mismatch">
+    Make sure you're using Node.js 20 or later. You can check your version with:
+
+    ```bash
+    node --version
+    ```
+
+    Consider using [nvm](https://github.com/nvm-sh/nvm) or [fnm](https://github.com/Schniz/fnm) to manage Node versions.
+  </Accordion>
+
+  <Accordion title="pnpm not found">
+    Install pnpm globally:
+
+    ```bash
+    npm install -g pnpm@10.22.0
+    ```
+
+    Or use corepack (recommended):
+
+    ```bash
+    corepack enable
+    corepack prepare pnpm@10.22.0 --activate
+    ```
+  </Accordion>
+
+  <Accordion title="Clerk authentication issues">
+    Verify that:
+    - You've created a Clerk account at [clerk.com](https://clerk.com)
+    - Your API keys are correctly set in `.env.local`
+    - The keys match the format: `pk_...` for publishable and `sk_...` for secret
+  </Accordion>
+
+  <Accordion title="Turborepo cache issues">
+    Clear the Turbo cache:
+
+    ```bash
+    rm -rf .turbo
+    pnpm build
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Architecture" icon="sitemap" href="/architecture">
+    Learn about the monorepo structure and application design
+  </Card>
+  <Card title="Contributing Guide" icon="code-pull-request" href="/contributing/guide">
+    Read the full contributing guidelines
+  </Card>
+  <Card title="Bifrost Docs" icon="shield" href="/applications/bifrost/overview">
+    Explore the admin dashboard documentation
+  </Card>
+  <Card title="Midgard Docs" icon="earth-americas" href="/applications/midgard/overview">
+    Explore the main website documentation
+  </Card>
+</CardGroup>

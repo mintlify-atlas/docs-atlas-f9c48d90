@@ -1,0 +1,562 @@
+---
+title: 'Database Schema'
+description: 'Complete Convex database schema reference'
+---
+
+## Overview
+
+The database schema is defined in `packages/backend/convex/schema.ts` using Convex's schema definition API.
+
+## Schema Definition
+
+```typescript
+import { defineSchema, defineTable } from "convex/server";
+import { v } from "convex/values";
+```
+
+## Tables
+
+### Companies
+
+Stores information about companies that host events.
+
+<Accordion title="companies" icon="building">
+  <ParamField path="orgNumber" type="number" required>
+    Organization number (unique identifier)
+  </ParamField>
+  
+  <ParamField path="name" type="string" required>
+    Company name
+  </ParamField>
+  
+  <ParamField path="description" type="string" required>
+    Company description
+  </ParamField>
+  
+  <ParamField path="mainSponsor" type="boolean" required>
+    Whether this company is the main sponsor
+  </ParamField>
+  
+  <ParamField path="logo" type="Id<'companyLogos'>" required>
+    Reference to company logo in companyLogos table
+  </ParamField>
+
+  **Indexes:**
+  - `search_name` - Search index on the `name` field
+</Accordion>
+
+### Company Logos
+
+Stores company logo images using Convex file storage.
+
+<Accordion title="companyLogos" icon="image">
+  <ParamField path="name" type="string" required>
+    Logo name/identifier
+  </ParamField>
+  
+  <ParamField path="image" type="Id<'_storage'>" required>
+    Reference to image file in Convex storage
+  </ParamField>
+</Accordion>
+
+### Users
+
+Core user table with authentication data.
+
+<Accordion title="users" icon="user">
+  <ParamField path="email" type="string" required>
+    User email address
+  </ParamField>
+  
+  <ParamField path="firstName" type="string" required>
+    User's first name
+  </ParamField>
+  
+  <ParamField path="lastName" type="string" required>
+    User's last name
+  </ParamField>
+  
+  <ParamField path="image" type="string" required>
+    Profile image URL
+  </ParamField>
+  
+  <ParamField path="externalId" type="string" required>
+    External authentication provider ID
+  </ParamField>
+  
+  <ParamField path="locked" type="boolean" required>
+    Whether the user account is locked
+  </ParamField>
+
+  **Indexes:**
+  - `by_ExternalId` - Index on `externalId` field
+  - `search_email` - Search index on `email` field
+</Accordion>
+
+### Students
+
+Student-specific information linked to users.
+
+<Accordion title="students" icon="graduation-cap">
+  <ParamField path="userId" type="Id<'users'>" required>
+    Reference to user in users table
+  </ParamField>
+  
+  <ParamField path="name" type="string" required>
+    Student's full name
+  </ParamField>
+  
+  <ParamField path="studyProgram" type="string" required>
+    Name of the study program
+  </ParamField>
+  
+  <ParamField path="semester" type="number" optional>
+    Current semester number
+  </ParamField>
+  
+  <ParamField path="year" type="number" required>
+    Current year of study
+  </ParamField>
+  
+  <ParamField path="degree" type="'Årsstudium' | 'Bachelor' | 'Master' | 'PhD'" required>
+    Degree level
+  </ParamField>
+
+  **Indexes:**
+  - `by_studyProgram` - Index on `studyProgram` field
+  - `by_userId` - Index on `userId` field
+  - `search_name` - Search index on `name` field
+</Accordion>
+
+### Points
+
+Tracks penalty points for students (e.g., late arrivals, no-shows).
+
+<Accordion title="points" icon="circle-exclamation">
+  <ParamField path="studentId" type="Id<'students'>" required>
+    Reference to student
+  </ParamField>
+  
+  <ParamField path="reason" type="string" required>
+    Reason for the penalty points
+  </ParamField>
+  
+  <ParamField path="severity" type="number" required>
+    Number of points (1 for late, 2 for no-show)
+  </ParamField>
+
+  **Indexes:**
+  - `by_studentId` - Index on `studentId` field
+</Accordion>
+
+### Events
+
+Event information and metadata.
+
+<Accordion title="events" icon="calendar">
+  <ParamField path="title" type="string" required>
+    Event title
+  </ParamField>
+  
+  <ParamField path="teaser" type="string" required>
+    Short teaser text
+  </ParamField>
+  
+  <ParamField path="description" type="string" required>
+    Full event description
+  </ParamField>
+  
+  <ParamField path="eventStart" type="number" required>
+    Event start timestamp (milliseconds)
+  </ParamField>
+  
+  <ParamField path="registrationOpens" type="number" required>
+    Registration opening timestamp (milliseconds)
+  </ParamField>
+  
+  <ParamField path="participationLimit" type="number" required>
+    Maximum number of participants
+  </ParamField>
+  
+  <ParamField path="location" type="string" required>
+    Event location
+  </ParamField>
+  
+  <ParamField path="food" type="string" required>
+    Food information
+  </ParamField>
+  
+  <ParamField path="language" type="string" required>
+    Event language
+  </ParamField>
+  
+  <ParamField path="ageRestriction" type="string" required>
+    Age restriction information
+  </ParamField>
+  
+  <ParamField path="externalUrl" type="string" optional>
+    External URL for the event
+  </ParamField>
+  
+  <ParamField path="hostingCompany" type="Id<'companies'>" required>
+    Reference to hosting company
+  </ParamField>
+  
+  <ParamField path="published" type="boolean" required>
+    Whether the event is published
+  </ParamField>
+  
+  <ParamField path="slug" type="string" optional>
+    URL-friendly event slug
+  </ParamField>
+  
+  <ParamField path="formId" type="Id<'form'>" optional>
+    Reference to feedback form
+  </ParamField>
+
+  **Indexes:**
+  - `by_eventStart` - Index on `eventStart` field
+  - `by_registrationOpens` - Index on `registrationOpens` field
+  - `by_slug` - Index on `slug` field
+</Accordion>
+
+### Event Organizers
+
+Links users to events they organize.
+
+<Accordion title="eventOrganizers" icon="users">
+  <ParamField path="eventId" type="Id<'events'>" required>
+    Reference to event
+  </ParamField>
+  
+  <ParamField path="userId" type="Id<'users'>" required>
+    Reference to organizer user
+  </ParamField>
+  
+  <ParamField path="role" type="'hovedansvarlig' | 'medhjelper'" required>
+    Organizer role (main responsible or helper)
+  </ParamField>
+
+  **Indexes:**
+  - `by_eventId` - Index on `eventId` field
+</Accordion>
+
+### Registrations
+
+Event registrations with status tracking.
+
+<Accordion title="registrations" icon="clipboard-check">
+  <ParamField path="eventId" type="Id<'events'>" required>
+    Reference to event
+  </ParamField>
+  
+  <ParamField path="userId" type="Id<'users'>" required>
+    Reference to registered user
+  </ParamField>
+  
+  <ParamField path="status" type="'registered' | 'pending' | 'waitlist'" required>
+    Registration status
+  </ParamField>
+  
+  <ParamField path="note" type="string" optional>
+    Optional registration note (e.g., dietary restrictions)
+  </ParamField>
+  
+  <ParamField path="registrationTime" type="number" required>
+    Registration timestamp (milliseconds)
+  </ParamField>
+  
+  <ParamField path="attendanceStatus" type="'confirmed' | 'late' | 'no_show'" optional>
+    Actual attendance status
+  </ParamField>
+  
+  <ParamField path="attendanceTime" type="number" optional>
+    Attendance check-in timestamp (milliseconds)
+  </ParamField>
+
+  **Indexes:**
+  - `by_eventId` - Index on `eventId` field
+  - `by_eventIdAndRegistrationTime` - Compound index on `eventId` and `registrationTime`
+  - `by_eventIdStatusAndRegistrationTime` - Compound index on `eventId`, `status`, and `registrationTime`
+  - `by_userId` - Index on `userId` field
+</Accordion>
+
+### Internals
+
+Internal organization members and positions.
+
+<Accordion title="internals" icon="user-tie">
+  <ParamField path="userId" type="Id<'users'>" required>
+    Reference to user
+  </ParamField>
+  
+  <ParamField path="position" type="string" required>
+    Position title
+  </ParamField>
+  
+  <ParamField path="group" type="string" required>
+    Group/committee name
+  </ParamField>
+  
+  <ParamField path="positionEmail" type="string" optional>
+    Position-specific email address
+  </ParamField>
+  
+  <ParamField path="rank" type="number" optional>
+    Display rank/order
+  </ParamField>
+
+  **Indexes:**
+  - `by_position` - Index on `position` field
+  - `by_userId` - Index on `userId` field
+</Accordion>
+
+### Access Rights
+
+User permission levels.
+
+<Accordion title="accessRights" icon="key">
+  <ParamField path="userId" type="Id<'users'>" required>
+    Reference to user
+  </ParamField>
+  
+  <ParamField path="role" type="'super-admin' | 'admin' | 'editor' | 'internal'" required>
+    Access role level
+  </ParamField>
+
+  **Indexes:**
+  - `by_userId` - Index on `userId` field
+  - `by_role` - Index on `role` field
+</Accordion>
+
+### Internal Groups
+
+Organization groups/committees.
+
+<Accordion title="internalGroups" icon="users-rectangle">
+  <ParamField path="name" type="string" required>
+    Group name
+  </ParamField>
+  
+  <ParamField path="description" type="string" required>
+    Group description
+  </ParamField>
+  
+  <ParamField path="leader" type="Id<'users'>" required>
+    Reference to group leader
+  </ParamField>
+</Accordion>
+
+### Resources
+
+General resources/content pages.
+
+<Accordion title="resources" icon="book">
+  <ParamField path="title" type="string" required>
+    Resource title
+  </ParamField>
+  
+  <ParamField path="content" type="string" required>
+    Full content (markdown/HTML)
+  </ParamField>
+  
+  <ParamField path="excerpt" type="string" required>
+    Short excerpt
+  </ParamField>
+  
+  <ParamField path="tag" type="string" optional>
+    Category tag
+  </ParamField>
+  
+  <ParamField path="favorite" type="boolean" optional>
+    Whether this is a featured resource
+  </ParamField>
+  
+  <ParamField path="icon" type="string" optional>
+    Icon identifier
+  </ParamField>
+  
+  <ParamField path="gradient" type="string" optional>
+    Gradient color scheme
+  </ParamField>
+  
+  <ParamField path="published" type="boolean" required>
+    Publication status
+  </ParamField>
+  
+  <ParamField path="updatedAt" type="number" required>
+    Last update timestamp (milliseconds)
+  </ParamField>
+
+  **Indexes:**
+  - `by_favoriteAndUpdated` - Compound index on `favorite` and `updatedAt`
+</Accordion>
+
+### Forms
+
+Form definitions for feedback and applications.
+
+<Accordion title="form" icon="file-lines">
+  <ParamField path="formType" type="'event-feedback' | 'listing-application'" required>
+    Type of form
+  </ParamField>
+
+  **Indexes:**
+  - `by_formType` - Index on `formType` field
+</Accordion>
+
+### Form Responses
+
+Submitted form data.
+
+<Accordion title="formResponses" icon="pen-to-square">
+  <ParamField path="formId" type="Id<'form'>" required>
+    Reference to form
+  </ParamField>
+  
+  <ParamField path="data" type="Record<string, any>" required>
+    Form response data as key-value pairs
+  </ParamField>
+
+  **Indexes:**
+  - `by_formId` - Index on `formId` field
+</Accordion>
+
+### External Pages
+
+CMS-style external pages.
+
+<Accordion title="externalPages" icon="file">
+  <ParamField path="identifier" type="string" required>
+    Unique page identifier/slug
+  </ParamField>
+  
+  <ParamField path="title" type="string" required>
+    Page title
+  </ParamField>
+  
+  <ParamField path="content" type="string" required>
+    Page content
+  </ParamField>
+  
+  <ParamField path="published" type="boolean" required>
+    Publication status
+  </ParamField>
+  
+  <ParamField path="updatedAt" type="number" required>
+    Last update timestamp (milliseconds)
+  </ParamField>
+
+  **Indexes:**
+  - `by_identifier` - Index on `identifier` field
+</Accordion>
+
+### Job Listings
+
+Job/internship postings from companies.
+
+<Accordion title="jobListings" icon="briefcase">
+  <ParamField path="title" type="string" required>
+    Job title
+  </ParamField>
+  
+  <ParamField path="type" type="string" required>
+    Job type (e.g., "internship", "full-time")
+  </ParamField>
+  
+  <ParamField path="teaser" type="string" required>
+    Short teaser text
+  </ParamField>
+  
+  <ParamField path="description" type="string" required>
+    Full job description
+  </ParamField>
+  
+  <ParamField path="applicationUrl" type="string" required>
+    URL to apply
+  </ParamField>
+  
+  <ParamField path="published" type="boolean" required>
+    Publication status
+  </ParamField>
+  
+  <ParamField path="company" type="Id<'companies'>" required>
+    Reference to company
+  </ParamField>
+  
+  <ParamField path="deadline" type="number" required>
+    Application deadline timestamp (milliseconds)
+  </ParamField>
+
+  **Indexes:**
+  - `by_deadline` - Index on `deadline` field
+  - `by_deadlineAndType` - Compound index on `type` and `deadline`
+  - `by_deadlineAndPublished` - Compound index on `published` and `deadline`
+</Accordion>
+
+### Job Listing Contacts
+
+Contact persons for job listings.
+
+<Accordion title="jobListingContacts" icon="address-card">
+  <ParamField path="listingId" type="Id<'jobListings'>" required>
+    Reference to job listing
+  </ParamField>
+  
+  <ParamField path="name" type="string" required>
+    Contact person name
+  </ParamField>
+  
+  <ParamField path="email" type="string" optional>
+    Contact email
+  </ParamField>
+  
+  <ParamField path="phone" type="string" optional>
+    Contact phone number
+  </ParamField>
+
+  **Indexes:**
+  - `by_listingId` - Index on `listingId` field
+</Accordion>
+
+## Access Roles
+
+The schema defines a union type for access control:
+
+```typescript
+export const accessRoles = v.union(
+  v.literal("super-admin"),
+  v.literal("admin"),
+  v.literal("editor"),
+  v.literal("internal"),
+);
+```
+
+## Using Indexes
+
+Indexes enable efficient queries. Example usage:
+
+```typescript
+// Query using an index
+const student = await ctx.db
+  .query("students")
+  .withIndex("by_userId", (q) => q.eq("userId", userId))
+  .first();
+
+// Search using a search index
+const companies = await ctx.db
+  .query("companies")
+  .withSearchIndex("search_name", (q) => q.search("name", searchQuery))
+  .take(10);
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Convex Setup" icon="gear" href="/backend/convex-setup">
+    Learn how to set up Convex
+  </Card>
+  <Card title="Backend Functions" icon="function" href="/backend/functions">
+    Explore available Convex functions
+  </Card>
+</CardGroup>

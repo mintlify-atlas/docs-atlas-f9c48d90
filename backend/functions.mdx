@@ -1,0 +1,594 @@
+---
+title: 'Convex Functions'
+description: 'Overview of backend functions for events, registrations, companies, and students'
+---
+
+## Overview
+
+The Convex backend provides queries and mutations organized by domain. All functions are type-safe and fully integrated with the database schema.
+
+## Events Functions
+
+Defined in `convex/events.ts`
+
+### Queries
+
+<Accordion title="getLatest" icon="calendar-days">
+  Get the latest upcoming events.
+
+  **Arguments:**
+  ```typescript
+  {
+    n: number  // Number of events to fetch
+  }
+  ```
+
+  **Returns:** Array of events with organizer information, filtered to show only published events starting from the current week.
+
+  **Example:**
+  ```typescript
+  const events = await ctx.db.query(api.events.getLatest, { n: 5 });
+  ```
+</Accordion>
+
+<Accordion title="getAll" icon="list">
+  Get all events for a specific semester.
+
+  **Arguments:**
+  ```typescript
+  {
+    semester: string,  // "vår" or "høst"
+    year: number
+  }
+  ```
+
+  **Returns:** Object with `published` and `unpublished` event arrays.
+</Accordion>
+
+<Accordion title="getCurrentSemester" icon="calendar">
+  Get events for the current semester, grouped by month.
+
+  **Arguments:**
+  ```typescript
+  {
+    isExternal: boolean  // Filter for external events
+  }
+  ```
+
+  **Returns:** Events grouped by month name with participation counts.
+</Accordion>
+
+<Accordion title="getEvent" icon="calendar-day">
+  Get a single event by ID or slug.
+
+  **Arguments:**
+  ```typescript
+  {
+    identifier: string  // Event ID or slug
+  }
+  ```
+
+  **Returns:** Event with hosting company name and organizers.
+
+  **Example:**
+  ```typescript
+  const event = await ctx.db.query(api.events.getEvent, { 
+    identifier: "v24-company-presentation-A1B2" 
+  });
+  ```
+</Accordion>
+
+<Accordion title="getPossibleSemesters" icon="calendar-range">
+  Get all semesters that have events.
+
+  **Returns:** Array of `{ year: number, semester: string }` objects.
+</Accordion>
+
+<Accordion title="getOrganizersByEventId" icon="users">
+  Get organizers for a specific event.
+
+  **Arguments:**
+  ```typescript
+  {
+    id: Id<"events">
+  }
+  ```
+
+  **Returns:** Array of organizers with names and roles.
+</Accordion>
+
+### Mutations
+
+<Accordion title="create" icon="plus">
+  Create a new event.
+
+  **Arguments:**
+  ```typescript
+  {
+    title: string,
+    teaser: string,
+    description: string,
+    eventStart: number,        // Timestamp in milliseconds
+    registrationOpens: number, // Timestamp in milliseconds
+    participationLimit: number,
+    location: string,
+    food: string,
+    language: string,
+    ageRestriction: string,
+    externalUrl?: string,
+    hostingCompany: Id<"companies">,
+    published: boolean,
+    organizers: Array<{
+      userId: Id<"users">,
+      role: "hovedansvarlig" | "medhjelper"
+    }>
+  }
+  ```
+
+  **Behavior:**
+  - Automatically generates a URL slug
+  - Creates an event feedback form
+  - Inserts organizers
+</Accordion>
+
+<Accordion title="update" icon="pen-to-square">
+  Update an existing event.
+
+  **Arguments:** Same as `create`, plus `id: Id<"events">`
+
+  **Behavior:**
+  - Updates event details
+  - Manages organizer changes (add/remove/update roles)
+  - Processes waitlist if participation limit increases
+</Accordion>
+
+<Accordion title="updatePublishedStatus" icon="eye">
+  Batch update publication status.
+
+  **Arguments:**
+  ```typescript
+  {
+    ids: Id<"events">[],
+    newPublishedStatus: boolean
+  }
+  ```
+</Accordion>
+
+## Registration Functions
+
+Defined in `convex/registration.ts`
+
+### Queries
+
+<Accordion title="getByEventId" icon="list">
+  Get all registrations for an event.
+
+  **Arguments:**
+  ```typescript
+  {
+    eventId: Id<"events">
+  }
+  ```
+
+  **Returns:**
+  ```typescript
+  {
+    registered: Registration[],  // Includes both "registered" and "pending"
+    waitlist: Registration[]
+  }
+  ```
+</Accordion>
+
+<Accordion title="getCurrentUser" icon="user">
+  Get all registrations for the current authenticated user.
+
+  **Returns:** Array of registrations with event details (title, start time).
+</Accordion>
+
+<Accordion title="getRegistrantsInfo" icon="chart-simple">
+  Get aggregated statistics about event registrants.
+
+  **Arguments:**
+  ```typescript
+  {
+    eventId: Id<"events">
+  }
+  ```
+
+  **Returns:** Nested object grouping participants by degree, program, and year.
+</Accordion>
+
+### Mutations
+
+<Accordion title="register" icon="user-plus">
+  Register the current user for an event.
+
+  **Arguments:**
+  ```typescript
+  {
+    eventId: Id<"events">,
+    note?: string  // Optional note (e.g., dietary restrictions)
+  }
+  ```
+
+  **Returns:** Registration status (`"registered"` or `"waitlist"`)
+
+  **Behavior:**
+  - Checks if event is full
+  - Places user on waitlist if capacity reached
+  - Prevents duplicate registrations
+</Accordion>
+
+<Accordion title="unregister" icon="user-minus">
+  Unregister from an event.
+
+  **Arguments:**
+  ```typescript
+  {
+    id: Id<"registrations">
+  }
+  ```
+
+  **Behavior:**
+  - Deletes registration
+  - Promotes next waitlist person to pending
+  - Applies penalty if unregistering within 24 hours of event
+</Accordion>
+
+<Accordion title="acceptPendingRegistration" icon="check">
+  Accept a pending registration (user moved from waitlist).
+
+  **Arguments:**
+  ```typescript
+  {
+    id: Id<"registrations">
+  }
+  ```
+
+  **Behavior:** Updates status from `"pending"` to `"registered"`
+</Accordion>
+
+<Accordion title="updateAttendance" icon="clipboard-check">
+  Mark attendance at an event.
+
+  **Arguments:**
+  ```typescript
+  {
+    id: Id<"registrations">,
+    newStatus: "confirmed" | "late" | "no_show"
+  }
+  ```
+
+  **Behavior:**
+  - Records attendance time
+  - Gives penalty points for late/no-show (1 point for late, 2 for no-show)
+  - Sends notification email
+</Accordion>
+
+<Accordion title="updateNote" icon="note-sticky">
+  Update the registration note.
+
+  **Arguments:**
+  ```typescript
+  {
+    id: Id<"registrations">,
+    note?: string
+  }
+  ```
+</Accordion>
+
+## Company Functions
+
+Defined in `convex/companies.ts`
+
+### Queries
+
+<Accordion title="getAll" icon="building">
+  Get all companies.
+
+  **Returns:** Array of all company documents.
+</Accordion>
+
+<Accordion title="getAllPaged" icon="table">
+  Get companies with pagination.
+
+  **Arguments:**
+  ```typescript
+  {
+    paginationOpts: PaginationOptions
+  }
+  ```
+
+  **Returns:** Paginated results with `page` and `continueCursor`.
+</Accordion>
+
+<Accordion title="getById" icon="search">
+  Get a company by ID.
+
+  **Arguments:**
+  ```typescript
+  {
+    id: Id<"companies">
+  }
+  ```
+
+  **Returns:** Company with logo image URL.
+</Accordion>
+
+<Accordion title="getMainSponsor" icon="star">
+  Get the main sponsor company.
+
+  **Returns:** Main sponsor company with logo URL, or `null`.
+</Accordion>
+
+<Accordion title="searchByName" icon="magnifying-glass">
+  Search companies by name.
+
+  **Arguments:**
+  ```typescript
+  {
+    searchQuery: string
+  }
+  ```
+
+  **Returns:** Up to 10 matching companies.
+</Accordion>
+
+### Mutations
+
+<Accordion title="create" icon="plus">
+  Create a new company.
+
+  **Arguments:**
+  ```typescript
+  {
+    orgNumber: number,
+    name: string,
+    description: string,
+    logo: Id<"companyLogos">
+  }
+  ```
+</Accordion>
+
+<Accordion title="update" icon="pen">
+  Update company information.
+
+  **Arguments:**
+  ```typescript
+  {
+    id: Id<"companies">,
+    orgNumber: number,
+    name: string,
+    description: string,
+    logo: Id<"companyLogos">
+  }
+  ```
+</Accordion>
+
+<Accordion title="updateMainSponsor" icon="trophy">
+  Set a company as the main sponsor.
+
+  **Arguments:**
+  ```typescript
+  {
+    companyId: Id<"companies">
+  }
+  ```
+
+  **Behavior:** Unsets previous main sponsor and sets the new one.
+</Accordion>
+
+<Accordion title="generateUploadUrl" icon="upload">
+  Generate a URL for uploading company logos.
+
+  **Returns:** Upload URL string.
+
+  **Example:**
+  ```typescript
+  const uploadUrl = await mutation(api.companies.generateUploadUrl);
+  // Upload file to uploadUrl
+  // Then call uploadCompanyLogo with the storage ID
+  ```
+</Accordion>
+
+<Accordion title="uploadCompanyLogo" icon="image">
+  Save uploaded logo to the database.
+
+  **Arguments:**
+  ```typescript
+  {
+    id: Id<"_storage">,  // From upload result
+    name: string
+  }
+  ```
+
+  **Returns:** Logo ID in `companyLogos` table.
+</Accordion>
+
+<Accordion title="remove" icon="trash">
+  Delete a company.
+
+  **Arguments:**
+  ```typescript
+  {
+    id: Id<"companies">
+  }
+  ```
+</Accordion>
+
+## Student Functions
+
+Defined in `convex/students.ts`
+
+### Queries
+
+<Accordion title="getAllPaged" icon="users">
+  Get students with optional search and pagination.
+
+  **Arguments:**
+  ```typescript
+  {
+    search?: string,
+    paginationOpts: PaginationOptions
+  }
+  ```
+
+  **Returns:** Paginated students with locked status.
+</Accordion>
+
+<Accordion title="getAllWithPoints" icon="ranking-star">
+  Get all students with their total penalty points.
+
+  **Returns:** Array of students sorted by points (descending).
+
+  **Example:**
+  ```typescript
+  [
+    { id: "...", name: "John Doe", points: 5 },
+    { id: "...", name: "Jane Smith", points: 2 }
+  ]
+  ```
+</Accordion>
+
+<Accordion title="getCurrent" icon="user">
+  Get current authenticated user's student profile.
+
+  **Returns:** Student document merged with user data.
+</Accordion>
+
+<Accordion title="getById" icon="id-card">
+  Get student by ID.
+
+  **Arguments:**
+  ```typescript
+  {
+    id: Id<"students">
+  }
+  ```
+
+  **Returns:** Student with user information (email, name, etc.).
+</Accordion>
+
+### Mutations
+
+<Accordion title="createByExternalId" icon="user-plus">
+  Create a student profile (used during onboarding).
+
+  **Arguments:**
+  ```typescript
+  {
+    externalId: string,
+    degree: "Årsstudium" | "Bachelor" | "Master" | "PhD",
+    year: number,
+    studyProgram: string,
+    name: string
+  }
+  ```
+
+  **Behavior:** Creates user if it doesn't exist, then creates student profile.
+</Accordion>
+
+<Accordion title="updateCurrent" icon="pen">
+  Update current user's student profile.
+
+  **Arguments:**
+  ```typescript
+  {
+    year: number,
+    studyProgram: string,
+    degree: "Årsstudium" | "Bachelor" | "Master" | "PhD"
+  }
+  ```
+</Accordion>
+
+<Accordion title="update" icon="pen-to-square">
+  Update any student profile (admin function).
+
+  **Arguments:**
+  ```typescript
+  {
+    id: Id<"students">,
+    year: number,
+    studyProgram: string,
+    degree: "Årsstudium" | "Bachelor" | "Master" | "PhD"
+  }
+  ```
+</Accordion>
+
+## Internal Functions
+
+Internal functions can only be called from other Convex functions, not from clients.
+
+<Accordion title="events.getAllEvents" icon="lock">
+  Internal query to get events for a semester range.
+
+  Used by public `getAll` and `getCurrentSemester` functions.
+</Accordion>
+
+<Accordion title="events.upsertEventOrganizer" icon="lock">
+  Internal mutation to sync event organizers.
+
+  Handles adding, removing, and updating organizer roles.
+</Accordion>
+
+<Accordion title="events.updateWaitlistMutation" icon="lock">
+  Internal mutation to process waitlist promotions.
+</Accordion>
+
+<Accordion title="students.updateYear" icon="lock">
+  Internal mutation to increment all student years.
+
+  Intended to be run on a schedule (e.g., at the start of each academic year).
+</Accordion>
+
+## Error Handling
+
+All functions use consistent error handling:
+
+```typescript
+if (!resource) {
+  throw new Error("Resource not found");
+}
+```
+
+Authenticated mutations check for user identity:
+
+```typescript
+const identity = await ctx.auth.getUserIdentity();
+if (identity === null) {
+  throw new Error("Unauthenticated call to mutation");
+}
+```
+
+## Helper Functions
+
+Some files export helper functions used by other Convex functions:
+
+<Accordion title="getCurrentUserOrThrow" icon="shield">
+  Get the current authenticated user or throw an error.
+
+  ```typescript
+  const user = await getCurrentUserOrThrow(ctx);
+  ```
+</Accordion>
+
+<Accordion title="makeStatusPending" icon="hourglass">
+  Promote a registration from waitlist to pending.
+
+  Sends an email notification to the user.
+  
+  ```typescript
+  await makeStatusPending(ctx, registration, event);
+  ```
+</Accordion>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Database Schema" icon="database" href="/backend/schema">
+    Review the complete database schema
+  </Card>
+  <Card title="Convex Setup" icon="gear" href="/backend/convex-setup">
+    Learn how to set up and deploy Convex
+  </Card>
+</CardGroup>

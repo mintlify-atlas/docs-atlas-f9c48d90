@@ -1,0 +1,180 @@
+---
+title: 'Features'
+description: 'Admin features and capabilities in Bifrost'
+icon: 'sparkles'
+---
+
+## Core Features
+
+Bifrost provides comprehensive administrative capabilities for managing the IFIs Navet student organization's digital platform.
+
+## Content Management
+
+Create, edit, and manage various types of content across the platform.
+
+### Resources Management
+
+<Card title="Resources" icon="folder">
+  Manage educational resources and materials for students including documents, links, and study materials.
+</Card>
+
+**Features:**
+- Create new resources with rich text content
+- Edit existing resources
+- Delete outdated materials
+- Organize resources by category
+- Rich text editing with Tiptap editor
+
+**Routes:**
+- `/resources` - Resource overview and list
+- `/resources/new-resource` - Create new resource
+- `/resources/[slug]/edit` - Edit existing resource
+- `/resources/[slug]` - View resource details
+
+### Pages Management
+
+<Card title="Static Pages" icon="file">
+  Manage static content pages for the website with full rich text editing capabilities.
+</Card>
+
+**Features:**
+- Create custom pages with markdown/rich text
+- Edit page content with live preview
+- Manage page metadata and SEO
+- URL slug management
+
+**Routes:**
+- `/pages` - Pages overview
+- `/pages/new-page` - Create new page
+- `/pages/[slug]` - Edit page
+
+## Event Management
+
+Comprehensive event organization and registration tracking system.
+
+<CardGroup cols={2}>
+  <Card title="Event Creation" icon="plus">
+    Create and configure events with detailed information, dates, and registration settings
+  </Card>
+  <Card title="Registration Tracking" icon="users">
+    Monitor event registrations and attendee information
+  </Card>
+  <Card title="QR Code Scanner" icon="qrcode">
+    Check-in attendees using QR code scanning
+  </Card>
+  <Card title="Event Reports" icon="chart-line">
+    View analytics and reports for event performance
+  </Card>
+</CardGroup>
+
+**Features:**
+- Create events with rich descriptions
+- Set registration limits and deadlines
+- Track attendee registrations in real-time
+- QR code-based check-in system
+- Event analytics and reporting
+- Registration list management
+- Export registration data
+
+**Routes:**
+- `/events` - Events dashboard
+- `/events/new-event` - Create new event
+- `/events/[slug]` - Event details and edit
+- `/events/[slug]/registrations` - View registrations
+- `/events/[slug]/report` - Event analytics
+
+<Note>
+  The registration scanner component uses `@zxing/browser` for QR code scanning functionality.
+</Note>
+
+## Job Listings
+
+Manage job opportunities and internships for students.
+
+<Card title="Job Board Management" icon="briefcase">
+  Create and manage job listings from partner companies, helping students find opportunities.
+</Card>
+
+**Features:**
+- Create job listings with detailed descriptions
+- Edit and update job postings
+- Link jobs to companies in the database
+- Manage job contacts and application information
+- Track listing expiration dates
+- Rich text job descriptions
+
+**Routes:**
+- `/job-listings` - Job listings overview
+- `/job-listings/new-listing` - Create new listing
+- `/job-listings/[slug]` - Edit job listing
+
+## Company Database
+
+Maintain a database of partner companies and their information.
+
+<Card title="Company Management" icon="building">
+  Keep track of partner companies, their contact information, and collaboration history.
+</Card>
+
+**Features:**
+- Add new partner companies
+- Edit company information
+- View company details and collaboration history
+- Link companies to job listings and events
+- Manage company contacts
+
+**Routes:**
+- `/companies` - Companies overview (admin-only)
+- `/companies/create-company` - Add new company
+- `/companies/[slug]` - View and edit company
+
+## Student Management
+
+View and manage student members of the organization.
+
+<Card title="Student Overview" icon="graduation-cap">
+  Access student member information and track participation in events and activities.
+</Card>
+
+**Features:**
+- View student member list
+- Track student points and participation
+- View individual student profiles
+- Manage student data
+
+**Routes:**
+- `/students` - Students overview (admin-only)
+- `/students/[slug]` - Student details
+
+## Organization Settings
+
+Manage organizational information and settings.
+
+<Card title="Organization Management" icon="gear">
+  Configure organization details, board members, and internal settings.
+</Card>
+
+**Features:**
+- Manage board members
+- Update organization information
+- Configure main sponsor information
+- Manage internal team members
+
+**Routes:**
+- `/organization` - Organization settings (admin-only)
+
+## Profile Management
+
+User profile and account management powered by Clerk.
+
+**Features:**
+- User profile editing
+- Account settings
+- Authentication management
+
+**Routes:**
+- `/profile` - User profile page (Clerk integration)
+
+<Note>
+  Admin-specific pages are protected with route groups using the `(admin-pages)` folder structure, ensuring proper access control.
+</Note>

@@ -1,0 +1,147 @@
+---
+title: Features
+description: Key features and functionality of the Midgard application
+---
+
+## Core Features
+
+Midgard provides a comprehensive platform for the IFI-Navet student association with the following key features:
+
+### Event Calendar
+
+A full overview of all events organized by IFI-Navet.
+
+<Card title="Event Management" icon="calendar-days">
+  - Browse all upcoming and past events
+  - View detailed event information and descriptions
+  - Register for events with a dedicated registration system
+  - Generate ICS calendar files for personal calendars
+</Card>
+
+**Routes:**
+- `/events` - Event listing page
+- `/events/[slug]` - Individual event details
+- `/events/[slug]/registration/[slug1]` - Event registration flow
+
+### Job Listings
+
+A dedicated section for companies to post job opportunities for students.
+
+<Card title="Job Board" icon="briefcase">
+  - Browse available job opportunities
+  - View detailed job descriptions and requirements
+  - Filter and search for relevant positions
+  - Direct connection between companies and students
+</Card>
+
+**Routes:**
+- `/job-listings` - Job listings overview
+- `/job-listings/[slug]` - Individual job posting details
+
+### Company Profiles
+
+Information about IFI-Navet's partner companies.
+
+<Card title="Company Information" icon="building">
+  - Learn about partner companies
+  - View company profiles and offerings
+  - Information specifically for companies interested in partnering
+</Card>
+
+**Route:** `/companies`
+
+### Student Resources
+
+A collection of useful resources for students at the Department of Informatics.
+
+<Card title="Student Hub" icon="book-open">
+  - Access student-specific information and resources
+  - Learn about IFI-Navet's offerings for students
+  - Connect with the student community
+</Card>
+
+**Route:** `/students`
+
+### Information Pages
+
+Dynamic content pages for various information and announcements.
+
+<Card title="Content Management" icon="newspaper">
+  - Dynamic information pages with rich text content
+  - Built with Tiptap rich text editor
+  - Sanitized HTML rendering for security
+</Card>
+
+**Route:** `/info/[slug]`
+
+### User Authentication & Profiles
+
+Secure user management powered by Clerk.
+
+<Card title="User Management" icon="user">
+  - Sign in and registration flow
+  - User profile management
+  - Secure authentication with Clerk
+  - Support for Norwegian localization
+</Card>
+
+**Routes:**
+- `/sign-in` - User sign in
+- `/sign-up` - User registration
+- `/profile` - User profile page
+
+<Tip>
+Catch-all routes (`[[...sign-in]]`, `[[...sign-up]]`) are used to support Clerk's authentication flow.
+</Tip>
+
+### Organization Information
+
+Information about IFI-Navet's organizational structure and activities.
+
+<Card title="About IFI-Navet" icon="sitemap">
+  - Learn about the organization structure
+  - Meet the team and board members
+  - Understand IFI-Navet's mission and vision
+</Card>
+
+**Route:** `/organization`
+
+### Contact
+
+Direct contact page for inquiries and communication.
+
+**Route:** `/contact`
+
+## Technical Features
+
+<CardGroup cols={2}>
+  <Card title="Route Groups" icon="folder">
+    Uses Next.js route groups like `(auth)` and `(home)` for logical organization without affecting URLs
+  </Card>
+  
+  <Card title="Error Handling" icon="triangle-exclamation">
+    Custom error pages with `error.tsx` and `global-error.tsx` for graceful error handling
+  </Card>
+  
+  <Card title="Analytics" icon="chart-line">
+    PostHog integration for product analytics and user insights
+  </Card>
+  
+  <Card title="Monitoring" icon="bug">
+    Sentry integration for error tracking and performance monitoring
+  </Card>
+</CardGroup>
+
+## Component Library
+
+Midgard includes organized component categories:
+
+- **Cards** - Reusable card components for content display
+- **Common** - Shared UI components used across the app
+- **Companies** - Company-specific components
+- **Events** - Event-related components and displays
+- **Home** - Landing page components
+- **Job Listings** - Job board components
+- **Loaders** - Loading states and skeletons
+- **Profile** - User profile components
+- **Students** - Student-specific UI elements

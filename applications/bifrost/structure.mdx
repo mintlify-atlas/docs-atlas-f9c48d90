@@ -1,0 +1,247 @@
+---
+title: 'Project Structure'
+description: 'File organization and architecture of Bifrost'
+icon: 'folder-tree'
+---
+
+## Directory Structure
+
+Bifrost follows Next.js App Router conventions with a clear separation of concerns.
+
+```
+apps/bifrost/
+├── src/
+│   ├── app/              # Next.js App Router pages
+│   ├── components/       # React components
+│   ├── constants/        # Schemas and constants
+│   ├── hooks/            # Custom React hooks
+│   ├── lib/              # Core logic and stores
+│   ├── providers/        # Context providers
+│   ├── utils/            # Utility functions
+│   └── assets/           # Static assets
+├── public/               # Public static files
+└── package.json
+```
+
+## App Directory
+
+The `src/app` directory uses Next.js 16 App Router with file-based routing.
+
+### Route Groups
+
+<CardGroup cols={2}>
+  <Card title="(admin-pages)" icon="lock">
+    Protected admin-only routes with shared layout
+  </Card>
+  <Card title="Public Routes" icon="globe">
+    Publicly accessible routes for events, jobs, and resources
+  </Card>
+</CardGroup>
+
+### Admin Pages (Protected)
+
+```
+app/(admin-pages)/
+├── companies/
+│   ├── [slug]/          # Company detail page
+│   ├── create-company/  # Create company form
+│   └── page.tsx         # Companies list
+├── organization/
+│   └── page.tsx         # Organization settings
+├── students/
+│   ├── [slug]/          # Student profile
+│   └── page.tsx         # Students list
+└── layout.tsx           # Admin layout wrapper
+```
+
+<Note>
+  The `(admin-pages)` route group allows pages to share a common layout without affecting the URL structure.
+</Note>
+
+### Public Pages
+
+```
+app/
+├── events/
+│   ├── [slug]/
+│   │   ├── registrations/  # Registration management
+│   │   ├── report/         # Event analytics
+│   │   ├── page.tsx        # Event detail/edit
+│   │   └── layout.tsx      # Event layout
+│   ├── new-event/          # Create event
+│   └── page.tsx            # Events list
+├── job-listings/
+│   ├── [slug]/             # Job detail/edit
+│   ├── new-listing/        # Create job listing
+│   └── page.tsx            # Jobs list
+├── pages/
+│   ├── [slug]/             # Edit page
+│   ├── new-page/           # Create page
+│   └── page.tsx            # Pages list
+├── resources/
+│   ├── [slug]/
+│   │   └── edit/           # Edit resource
+│   ├── new-resource/       # Create resource
+│   └── page.tsx            # Resources list
+├── profile/
+│   └── [[...rest]]/        # Clerk profile pages
+└── page.tsx                # Dashboard home
+```
+
+## Components Directory
+
+Components are organized by feature/domain.
+
+```
+components/
+├── common/
+│   ├── forms/
+│   │   └── markdown-editor/  # Tiptap rich text editor
+│   ├── sidebar/              # Navigation sidebar
+│   └── tables/               # Reusable table components
+├── companies/
+│   └── companies-form/       # Company form components
+├── events/
+│   ├── event-form/           # Event creation/edit form
+│   ├── registration-scanner/ # QR code scanner
+│   ├── registrations/        # Registration management
+│   └── report/
+│       └── cards/            # Event analytics cards
+├── job-listings/
+│   ├── job-listing-contacts-table/
+│   ├── job-listings-form/
+│   └── listings-table/
+├── organization/
+│   ├── board-members/        # Board member management
+│   ├── internals/            # Internal team management
+│   └── main-sponsor/         # Sponsor configuration
+├── pages/                    # Page management components
+├── profile/                  # User profile components
+├── resources/                # Resource components
+├── students/
+│   └── points-table/         # Student points tracking
+└── home/                     # Dashboard home components
+```
+
+<Card title="Component Organization" icon="puzzle-piece">
+  Components are grouped by feature domain (events, companies, etc.) with shared components in the `common` directory.
+</Card>
+
+## Core Directories
+
+### Constants
+
+```
+constants/
+└── schemas/    # Zod validation schemas
+```
+
+Contains Zod schemas for form validation and data validation across the application.
+
+### Hooks
+
+```
+hooks/          # Custom React hooks
+```
+
+Custom hooks for shared logic, data fetching, and state management.
+
+### Lib
+
+```
+lib/
+└── stores/     # Zustand state stores
+```
+
+Core application logic and Zustand stores for global state management.
+
+### Providers
+
+```
+providers/      # React context providers
+```
+
+Context providers for Convex, Clerk, theming, and other global concerns.
+
+### Utils
+
+```
+utils/          # Utility functions
+```
+
+Helper functions, formatters, and shared utilities.
+
+### Assets
+
+```
+assets/
+└── navet/      # Navet-specific assets
+```
+
+Static assets including images, logos, and other media files.
+
+## Special Files
+
+### Root Level
+
+<CardGroup cols={2}>
+  <Card title="layout.tsx" icon="layer-group">
+    Root layout with providers and global styles
+  </Card>
+  <Card title="error.tsx" icon="triangle-exclamation">
+    Error boundary for error handling
+  </Card>
+  <Card title="global-error.tsx" icon="bug">
+    Global error handler with Sentry integration
+  </Card>
+  <Card title="not-found.tsx" icon="file-slash">
+    Custom 404 page
+  </Card>
+</CardGroup>
+
+### Route-Specific
+
+- `loading.tsx` - Loading states for async routes
+- `layout.tsx` - Nested layouts for route segments
+- `page.tsx` - Page components for routes
+
+## Workspace Packages
+
+Bifrost depends on shared workspace packages:
+
+```json
+"@workspace/backend"       // Convex backend functions
+"@workspace/auth"          // Authentication utilities
+"@workspace/shared"        // Shared types and utilities
+"@workspace/ui"            // Shared UI components
+"@workspace/typescript-config"  // Shared TypeScript config
+```
+
+<Note>
+  These packages are part of the Yggdrasil monorepo and enable code sharing across applications.
+</Note>
+
+## Build Configuration
+
+### Scripts
+
+```bash
+pnpm dev        # Start development server (port 3001, with Turbopack)
+pnpm build      # Production build
+pnpm start      # Start production server
+pnpm lint       # Run Next.js linting
+pnpm check      # Run Biome linter/formatter
+pnpm check:fix  # Auto-fix Biome issues
+```
+
+### Development Tools
+
+- **Turbopack**: Enabled for faster development builds
+- **Biome**: Code linting and formatting
+- **TypeScript**: Type checking
+- **Sentry**: Error tracking and monitoring
+- **PostHog**: Analytics and feature flags
+
+<Card title="Modern Tooling" icon="wrench">
+  Bifrost uses Turbopack for faster development, Biome for linting/formatting, and integrates Sentry and PostHog for production monitoring.
+</Card>

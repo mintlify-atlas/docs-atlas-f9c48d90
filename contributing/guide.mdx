@@ -1,0 +1,139 @@
+---
+title: Contributing Guide
+description: Learn how to contribute to the Yggdrasil project
+---
+
+Welcome to the Yggdrasil project! We are excited that you are interested in contributing. To maintain quality and consistency, we ask that all contributions follow the guidelines below.
+
+<Note>
+  All issues, pull requests, commits, and documentation must be written in **English** to ensure accessibility and understanding for all contributors and maintainers.
+</Note>
+
+## Contribution Workflow
+
+Follow these steps to contribute to the Yggdrasil project:
+
+<Steps>
+  <Step title="Create an issue">
+    We appreciate it if, as a new contributor, you first create an issue that we can review and approve before you potentially waste both our and your time implementing and testing something that is not an issue or otherwise not to be done.
+
+    When creating an issue:
+    - Use English
+    - Provide a clear and descriptive title
+    - Explain the problem or suggestion in detail
+    - If it's a bug, include steps to reproduce, expected behavior, and actual behavior
+    - Include environment details (OS, version, dependencies)
+    - Assign appropriate labels (e.g., `bug`, `enhancement`, `documentation`)
+
+    <Info>
+      Issues are assessed based on impact, size, and contribution history. We try to approve as many issues as possible and will respond as quickly as we can. Issues will be approved by either the "webansvarlig-ifinavet" account or the personal account of the main maintainer.
+    </Info>
+  </Step>
+
+  <Step title="Wait for approval">
+    Wait for your issue to be approved before starting work. This ensures we're aligned on the change before you invest time in implementation.
+  </Step>
+
+  <Step title="Set up the project">
+    Once your issue is approved, read through the getting started documentation for the services you need to run. Since not all issues require all services to run, we have separated the setup documentation for each service.
+
+    For most issues, the most common services that need to be set up are Convex and Midgard.
+  </Step>
+
+  <Step title="Create a branch">
+    Create a branch for your feature or fix:
+    - Feature branches: `feature/my-feature`
+    - Bug fix branches: `fix/my-bug`
+  </Step>
+
+  <Step title="Make your changes">
+    Implement your changes following the repository's coding style and conventions.
+  </Step>
+
+  <Step title="Add documentation">
+    Every change must include proper documentation:
+    - Document any new features, bug fixes, or updates
+    - If a feature affects user or developer usage, update the relevant `README.md` or docs folder
+    - Keep documentation clear and comprehensive
+  </Step>
+
+  <Step title="Write tests">
+    All code must be tested:
+    - Write appropriate tests for your changes
+    - If tests are missing or cannot be created, explicitly state the reason in the PR description under a "Why no tests?" section
+  </Step>
+
+  <Step title="Open a pull request">
+    Create a PR with a clear description that includes:
+    - What was changed
+    - Why the change was made
+    - How it was tested
+    - Reference to related issues (e.g., `Closes #123`)
+
+    <Warning>
+      If "webansvarlig-ifinavet" is not automatically selected to approve the PR, select it manually. If the account is not requested for approval, the primary maintainer will not be notified and it will cause a delay in merging.
+    </Warning>
+  </Step>
+
+  <Step title="Wait for review">
+    Wait for the primary maintainer to review your PR. If changes are requested, make the necessary updates.
+
+    Should your PR be declined, you will be provided with an explanation of what you need to change. Feel free to comment if you have questions about the explanation.
+  </Step>
+
+  <Step title="Celebrate your contribution">
+    Once your PR is approved and merged, congratulations! You are now an official contributor to the project. Give yourself a pat on the back and feel free to start on a new issue if there are any.
+  </Step>
+</Steps>
+
+## Pull Request Requirements
+
+When opening a pull request, ensure:
+
+### Documentation
+Every PR must include proper documentation for any new feature, bug fix, or update. If a feature affects user or developer usage, update the relevant `README.md` or docs folder.
+
+### Testing
+All code must be tested. If tests are missing or cannot be created, the contributor must explicitly state the reason in the PR description (`Why no tests?` section).
+
+### Clarity
+PR title and description should clearly explain:
+- What was changed
+- Why the change was made
+- How it was tested
+
+### Conventions
+- Follow the repository's coding style
+- Reference related issues when applicable (e.g., `Closes #123`)
+
+## Reporting Bugs
+
+If you find a bug, please let us know by creating an issue in the repository. We would love to check it out and find a solution.
+
+Provide as much detail as you can (the more the merrier), including:
+- Steps to reproduce the bug
+- Expected behavior
+- Actual behavior
+- Any relevant screenshots or logs
+- Environment details
+
+<Tip>
+  For security vulnerabilities, please follow our [Security Policy](/contributing/security) and report them privately.
+</Tip>
+
+## Enforcement
+
+<Warning>
+  If any contribution (issue or PR) violates the requirements above, it will be closed or denied.
+</Warning>
+
+- Maintainers may request changes; if updates are not provided within a reasonable time, the contribution may be closed
+- Repeated violations may lead to being blocked from contributing
+
+## Code of Conduct
+
+This project follows a Code of Conduct. Please be respectful, collaborative, and constructive when interacting with others. Read the full [Code of Conduct](/contributing/code-of-conduct) for details.
+
+## Thank You
+
+Your contributions help improve this project for everyone. Thank you for following these guidelines and making the project better!

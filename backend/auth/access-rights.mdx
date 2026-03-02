@@ -1,0 +1,357 @@
+---
+title: "Access Rights & Authorization"
+description: "Role-based access control and authorization patterns"
+---
+
+The application implements a role-based access control (RBAC) system using Convex for managing user permissions and authorization.
+
+## Access Roles
+
+Four distinct roles are defined in the system, each with different permission levels:
+
+```typescript packages/backend/convex/schema.ts
+export const accessRoles = v.union(
+  v.literal("super-admin"),
+  v.literal("admin"),
+  v.literal("editor"),
+  v.literal("internal"),
+);
+```
+
+### Role Hierarchy
+
+<CardGroup cols={2}>
+  <Card title="super-admin" icon="crown">
+    Full system access including user management and access rights modification
+  </Card>
+  <Card title="admin" icon="shield-halved">
+    Administrative access to most features except access rights management
+  </Card>
+  <Card title="editor" icon="pen-to-square">
+    Edit permissions for content and resources
+  </Card>
+  <Card title="internal" icon="users">
+    Basic authenticated access for internal users
+  </Card>
+</CardGroup>
+
+## Database Schema
+
+Access rights are stored in the `accessRights` table:
+
+```typescript packages/backend/convex/schema.ts
+accessRights: defineTable({
+  userId: v.id("users"),
+  role: accessRoles,
+})
+  .index("by_userId", ["userId"])
+  .index("by_role", ["role"]),
+```
+
+### Indexes
+
+- `by_userId` - Quickly lookup a user's access rights
+- `by_role` - Query all users with a specific role
+
+## Authorization Functions
+
+### Checking User Rights
+
+The `checkRights` query verifies if the current user has one of the specified roles:
+
+```typescript packages/backend/convex/accsessRights.ts
+export const checkRights = query({
+  args: {
+    right: v.array(accessRoles),
+  },
+  handler: async (ctx, { right }) => {
+    const currentUser = await getCurrentUser(ctx);
+    if (!currentUser) return false;
+
+    const usersRights = await ctx.db
+      .query("accessRights")
+      .withIndex("by_userId", (q) => q.eq("userId", currentUser._id))
+      .first();
+    if (!usersRights) return false;
+
+    return right.includes(usersRights.role);
+  },
+});
+```
+
+<Info>
+The function returns `false` if the user is not authenticated or has no assigned role, rather than throwing an error. This allows for graceful permission checks in the UI.
+</Info>
+
+### Updating Access Rights
+
+Only super-admins can modify access rights:
+
+```typescript packages/backend/convex/accsessRights.ts
+export const upsertAccessRights = mutation({
+  args: {
+    userId: v.id("users"),
+    role: accessRoles,
+  },
+  handler: async (ctx, { userId, role }) => {
+    const currentUser = await getCurrentUser(ctx);
+    if (!currentUser) throw new Error("Unauthorized");
+
+    const isSuperAdmin = await ctx.runQuery(api.accsessRights.checkRights, {
+      right: ["super-admin"],
+    });
+    if (!isSuperAdmin)
+      throw new Error(
+        "Unauthorized: You do not have permission to change access rights",
+      );
+
+    const usersRights = await ctx.db
+      .query("accessRights")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .first();
+
+    if (usersRights) {
+      await ctx.db.patch(usersRights._id, { role });
+    } else {
+      await ctx.db.insert("accessRights", { userId, role });
+    }
+  },
+});
+```
+
+<Warning>
+Access rights modification is a critical operation. The system enforces that only super-admins can grant or revoke permissions to prevent privilege escalation.
+</Warning>
+
+## Permission Helper Functions
+
+The `@workspace/auth` package provides convenient helper functions for common permission checks:
+
+### Basic Rights (Internal Access)
+
+```typescript packages/auth/accessRights.ts
+export async function hasBasicRights() {
+  const token = await getAuthToken();
+  return await fetchQuery(
+    api.accsessRights.checkRights,
+    { right: ["internal", "editor", "admin", "super-admin"] },
+    { token },
+  );
+}
+```
+
+Returns `true` if the user has any authenticated role.
+
+### Edit Rights
+
+```typescript packages/auth/accessRights.ts
+export async function hasEditRights() {
+  const token = await getAuthToken();
+
+  return await fetchQuery(
+    api.accsessRights.checkRights,
+    { right: ["admin", "super-admin", "editor"] },
+    { token },
+  );
+}
+```
+
+Returns `true` if the user can edit content (editor, admin, or super-admin).
+
+### Admin Rights
+
+```typescript packages/auth/accessRights.ts
+export async function hasAdminRights() {
+  const token = await getAuthToken();
+
+  return await fetchQuery(
+    api.accsessRights.checkRights,
+    { right: ["admin", "super-admin"] },
+    { token },
+  );
+}
+```
+
+Returns `true` if the user has admin or super-admin privileges.
+
+### Super Admin Rights
+
+```typescript packages/auth/accessRights.ts
+export async function hasAllRights() {
+  const token = await getAuthToken();
+
+  return await fetchQuery(api.accsessRights.checkRights, { right: ["super-admin"] }, { token });
+}
+```
+
+Returns `true` only if the user is a super-admin.
+
+## Usage Patterns
+
+### Server-Side Authorization in Next.js
+
+Protect server components and API routes:
+
+```typescript
+import { hasAdminRights } from "@workspace/auth";
+import { redirect } from "next/navigation";
+
+export default async function AdminPage() {
+  const isAdmin = await hasAdminRights();
+  
+  if (!isAdmin) {
+    redirect("/unauthorized");
+  }
+  
+  return <div>Admin Dashboard</div>;
+}
+```
+
+### Convex Query Authorization
+
+Protect Convex queries and mutations:
+
+```typescript
+import { query } from "./_generated/server";
+import { getCurrentUser } from "./users";
+
+export const sensitiveData = query({
+  handler: async (ctx) => {
+    const user = await getCurrentUser(ctx);
+    if (!user) throw new Error("Unauthorized");
+    
+    const hasPermission = await ctx.runQuery(api.accsessRights.checkRights, {
+      right: ["admin", "super-admin"],
+    });
+    
+    if (!hasPermission) {
+      throw new Error("Insufficient permissions");
+    }
+    
+    // Return sensitive data
+    return await ctx.db.query("sensitiveTable").collect();
+  },
+});
+```
+
+### Conditional UI Rendering
+
+```typescript
+import { hasEditRights } from "@workspace/auth";
+
+export default async function ContentPage() {
+  const canEdit = await hasEditRights();
+  
+  return (
+    <div>
+      <h1>Content</h1>
+      {canEdit && (
+        <button>Edit Content</button>
+      )}
+    </div>
+  );
+}
+```
+
+<Note>
+Client-side permission checks are for UI purposes only. Always enforce permissions on the backend in Convex queries and mutations.
+</Note>
+
+## Permission Check Examples
+
+### Multiple Role Requirements
+
+```typescript
+// Check if user is either admin or super-admin
+const isAdminLevel = await ctx.runQuery(api.accsessRights.checkRights, {
+  right: ["admin", "super-admin"],
+});
+```
+
+### Single Role Requirement
+
+```typescript
+// Check if user is specifically a super-admin
+const isSuperAdmin = await ctx.runQuery(api.accsessRights.checkRights, {
+  right: ["super-admin"],
+});
+```
+
+### All Authenticated Users
+
+```typescript
+// Check if user has any role (is authenticated with permissions)
+const hasAnyRole = await ctx.runQuery(api.accsessRights.checkRights, {
+  right: ["internal", "editor", "admin", "super-admin"],
+});
+```
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Always validate on the backend">
+    Never rely solely on client-side permission checks. Always validate permissions in Convex queries and mutations where the actual data access occurs.
+  </Accordion>
+  
+  <Accordion title="Use helper functions">
+    Prefer the predefined helper functions (`hasBasicRights`, `hasEditRights`, etc.) for common permission patterns to maintain consistency.
+  </Accordion>
+  
+  <Accordion title="Fail securely">
+    When in doubt, deny access. The `checkRights` function returns `false` for unauthenticated users or users without roles.
+  </Accordion>
+  
+  <Accordion title="Minimize permission checks">
+    Cache permission results when making multiple checks in the same request to avoid redundant database queries.
+  </Accordion>
+  
+  <Accordion title="Audit access rights changes">
+    Consider logging all access rights modifications for security auditing purposes.
+  </Accordion>
+</AccordionGroup>
+
+## Security Considerations
+
+<Warning>
+**Critical Security Points:**
+
+- Only super-admins can modify access rights
+- Permission checks return `false` by default for safety
+- Always authenticate users before checking permissions
+- Backend validation is mandatory, client-side checks are supplementary
+</Warning>
+
+### Common Pitfalls
+
+1. **Forgetting backend validation** - Client-side checks can be bypassed
+2. **Not handling null users** - Always check if user exists before checking permissions
+3. **Hardcoding permissions** - Use the role constants and helper functions
+4. **Exposing sensitive queries** - Protect all data access with appropriate permission checks
+
+## Related Tables
+
+Access rights integrate with other tables for specific user types:
+
+### Students Table
+
+```typescript
+students: defineTable({
+  userId: v.id("users"),
+  // ... other fields
+}).index("by_userId", ["userId"]),
+```
+
+### Internals Table
+
+```typescript
+internals: defineTable({
+  userId: v.id("users"),
+  position: v.string(),
+  group: v.string(),
+  // ... other fields
+}).index("by_userId", ["userId"]),
+```
+
+<Info>
+Users can have multiple roles across different tables (e.g., a user can be both a student and have editor access rights). The `accessRights` table specifically controls system-level permissions.
+</Info>

@@ -1,0 +1,216 @@
+---
+title: Project Structure
+description: Understanding the Midgard codebase organization and routing
+---
+
+## Directory Structure
+
+Midgard follows Next.js App Router conventions with a clean, organized structure:
+
+```
+midgard/
+├── src/
+│   ├── app/                    # Next.js App Router
+│   │   ├── (auth)/            # Authentication route group
+│   │   │   ├── sign-in/
+│   │   │   │   └── [[...sign-in]]/
+│   │   │   └── sign-up/
+│   │   │       └── [[...sign-up]]/
+│   │   ├── (home)/            # Home page route group
+│   │   ├── companies/         # Company information pages
+│   │   ├── students/          # Student resources pages
+│   │   ├── contact/           # Contact page
+│   │   ├── job-listings/      # Job board
+│   │   │   └── [slug]/        # Individual job details
+│   │   ├── profile/           # User profile pages
+│   │   ├── events/            # Event calendar
+│   │   │   └── [slug]/        # Event details
+│   │   │       └── registration/
+│   │   │           └── [slug1]/
+│   │   ├── info/              # Dynamic info pages
+│   │   │   └── [slug]/
+│   │   ├── organization/      # About IFI-Navet
+│   │   ├── layout.tsx         # Root layout
+│   │   ├── error.tsx          # Error boundary
+│   │   ├── global-error.tsx   # Global error handler
+│   │   ├── not-found.tsx      # 404 page
+│   │   └── globals.css        # Global styles
+│   ├── components/            # React components
+│   │   ├── cards/
+│   │   ├── common/
+│   │   ├── companies/
+│   │   ├── events/
+│   │   ├── home/
+│   │   ├── job-listings/
+│   │   ├── loaders/
+│   │   ├── profile/
+│   │   └── students/
+│   ├── assets/                # Static assets
+│   │   ├── icons/
+│   │   ├── navet/
+│   │   └── promo_images/
+│   ├── constants/             # App constants
+│   │   └── event-types.ts
+│   ├── providers/             # Context providers
+│   ├── utils/                 # Utility functions
+│   │   ├── dateFormatting.ts
+│   │   └── icsCalendarEvent.ts
+│   ├── instrumentation.ts     # App instrumentation
+│   ├── instrumentation-client.ts
+│   └── proxy.ts               # Proxy configuration
+├── package.json
+└── ...
+```
+
+## App Router Structure
+
+### Route Groups
+
+<Info>
+Route groups in Next.js use parentheses `()` to organize routes without affecting the URL structure.
+</Info>
+
+#### (auth) - Authentication Routes
+
+Handles sign-in and registration pages:
+
+```
+(auth)/
+├── sign-in/[[...sign-in]]/page.tsx    → /sign-in
+└── sign-up/[[...sign-up]]/page.tsx    → /sign-up
+```
+
+<Tip>
+The `[[...sign-in]]` syntax creates an optional catch-all route, allowing Clerk to handle multiple authentication sub-routes.
+</Tip>
+
+#### (home) - Landing Page
+
+Contains the home page while keeping it separate from other routes:
+
+```
+(home)/page.tsx    → /
+```
+
+### Public Routes
+
+#### Static Pages
+
+```
+companies/page.tsx      → /companies
+students/page.tsx       → /students
+contact/page.tsx        → /contact
+organization/page.tsx   → /organization
+profile/page.tsx        → /profile
+```
+
+#### Dynamic Routes
+
+<Card title="Events" icon="calendar">
+```
+events/
+├── page.tsx                           → /events
+└── [slug]/
+    ├── page.tsx                       → /events/:slug
+    └── registration/
+        └── [slug1]/page.tsx           → /events/:slug/registration/:slug1
+```
+</Card>
+
+<Card title="Job Listings" icon="briefcase">
+```
+job-listings/
+├── page.tsx           → /job-listings
+└── [slug]/page.tsx    → /job-listings/:slug
+```
+</Card>
+
+<Card title="Info Pages" icon="newspaper">
+```
+info/
+└── [slug]/page.tsx    → /info/:slug
+```
+</Card>
+
+## Component Organization
+
+Components are organized by feature area:
+
+<CardGroup cols={2}>
+  <Card title="cards/" icon="square">
+    Reusable card components for displaying content blocks
+  </Card>
+  
+  <Card title="common/" icon="puzzle-piece">
+    Shared components used across multiple pages (navigation, footer, etc.)
+  </Card>
+  
+  <Card title="companies/" icon="building">
+    Company-specific UI components
+  </Card>
+  
+  <Card title="events/" icon="calendar">
+    Event calendar and event card components
+  </Card>
+  
+  <Card title="home/" icon="house">
+    Landing page sections and hero components
+  </Card>
+  
+  <Card title="job-listings/" icon="briefcase">
+    Job board cards and filters
+  </Card>
+  
+  <Card title="loaders/" icon="spinner">
+    Loading states and skeleton screens
+  </Card>
+  
+  <Card title="profile/" icon="user">
+    User profile management components
+  </Card>
+  
+  <Card title="students/" icon="graduation-cap">
+    Student-facing resource components
+  </Card>
+</CardGroup>
+
+## Key Files
+
+### Application Configuration
+
+- **`layout.tsx`** - Root layout with providers, theme, and navigation
+- **`globals.css`** - Global CSS and Tailwind directives
+- **`error.tsx`** - Page-level error boundary
+- **`global-error.tsx`** - Application-level error handler
+- **`not-found.tsx`** - Custom 404 page
+
+### Utilities
+
+- **`dateFormatting.ts`** - Date formatting helpers for events
+- **`icsCalendarEvent.ts`** - ICS calendar file generation
+- **`event-types.ts`** - Event type constants and definitions
+
+### Instrumentation
+
+- **`instrumentation.ts`** - Server-side monitoring setup
+- **`instrumentation-client.ts`** - Client-side analytics (PostHog)
+- **`posthog-page-view.tsx`** - Page view tracking component
+
+<Tip>
+Midgard uses Sentry for error monitoring and PostHog for product analytics, configured through the instrumentation files.
+</Tip>
+
+## Shared Packages
+
+Midgard leverages monorepo workspace packages:
+
+```json
+"@workspace/backend"  // Convex backend functions
+"@workspace/shared"   // Shared utilities and types
+"@workspace/ui"       // Shared UI components
+"@workspace/auth"     // Authentication utilities
+```
+
+<Info>
+These workspace packages enable code sharing across the entire Yggdrasil monorepo.
+</Info>

@@ -1,0 +1,217 @@
+---
+title: Features
+description: Core functionality and features of the Hugin feedback application
+---
+
+# Hugin Features
+
+Hugin provides a comprehensive event feedback collection system with user-friendly interfaces and robust validation.
+
+## Event Feedback Forms
+
+The primary feature of Hugin is collecting structured feedback from event attendees.
+
+### Form Question Types
+
+Hugin supports multiple question types for flexible feedback collection:
+
+<AccordionGroup>
+  <Accordion title="Rating Questions" icon="star">
+    5-point rating scale with customizable labels:
+    
+    - Event satisfaction rating
+    - Company impression rating
+    - Expectation vs reality rating
+    
+    **Implementation:** `RatingCard` component in `src/components/input-cards/rating-card.tsx:7`
+    
+    ```tsx
+    <RatingCard
+      field={field}
+      label="Hvordan syntes du arrangementet var?"
+      lowLabel="Veldig Dårlig"
+      highLabel="Veldig Bra"
+      required
+    />
+    ```
+  </Accordion>
+  
+  <Accordion title="Text Input Questions" icon="text">
+    Open-ended text responses with character limits:
+    
+    - What did you think about the event and company?
+    - What could make the event better?
+    - Other comments (optional)
+    
+    Maximum 1000 characters per response.
+    
+    **Implementation:** `TextInputCard` component in `src/components/input-cards/text-input-card.tsx:8`
+  </Accordion>
+  
+  <Accordion title="Boolean Questions" icon="toggle-on">
+    Yes/no questions for binary choices:
+    
+    - "Can you imagine working for this company?"
+    
+    **Implementation:** `BooleanCard` component in `src/components/input-cards/boolean-card.tsx:7`
+  </Accordion>
+  
+  <Accordion title="Multiple Choice Questions" icon="list-check">
+    Select one or more options from a predefined list:
+    
+    - How did you hear about the event?
+      - ifinavet.no
+      - Stand outside Simula
+      - Facebook (IFI-studenter)
+      - Facebook (Event page)
+      - Instagram
+      - Friends
+    
+    **Implementation:** `MultipleOptionsCard` component in `src/components/input-cards/multiple-options-card.tsx:9`
+  </Accordion>
+</AccordionGroup>
+
+### Form Schema Validation
+
+All feedback forms use Zod schema validation defined in `src/lib/schema/event-feedback-schema.ts:3`:
+
+```typescript
+export const eventResponseFromSchema = z.object({
+  satisfaction: z.int().min(1).max(5),
+  impression: z.int().min(1).max(5),
+  expectation: z.int().min(1).max(5),
+  toughts: z.string().min(1).max(1000),
+  improvements: z.string().min(1).max(1000),
+  want_to_work: z.enum(["ja", "nei"]),
+  word_of_mouth: z.array(z.string()).min(1),
+  other: z.string().max(1000),
+});
+```
+
+## Access Control & Validation
+
+Hugin implements several layers of access control to ensure feedback integrity.
+
+### Authentication
+
+<Card title="Clerk Integration" icon="lock">
+  All feedback routes require Clerk authentication. Unauthenticated users are redirected to sign-in.
+  
+  Implemented in `src/app/event-feedback/[slug]/page.tsx:20`
+</Card>
+
+### Attendance Verification
+
+Before allowing feedback submission, Hugin verifies:
+
+1. **Event has a feedback form** - The event must have an associated form
+2. **User attended the event** - Checks against event registration records
+3. **User hasn't already submitted** - Prevents duplicate responses
+
+```typescript
+const ableToAnswer = await fetchQuery(
+  api.forms.checkIfCurrentUserAttendedTheEventAndShouldBeAbleToSubmit,
+  { eventId: event._id },
+  { token }
+);
+```
+
+### Duplicate Prevention
+
+If a user has already submitted feedback, they're shown a confirmation message with a link to view their existing response instead of the form.
+
+## Response Management
+
+### Form Submission
+
+Feedback is submitted to the Convex backend via the `submitFormResponse` mutation:
+
+```typescript
+formResponseMutation({
+  formId: event.formId!,
+  data: {
+    userId,
+    eventId: event._id,
+    ...value,
+  },
+});
+```
+
+### View Previous Responses
+
+Users can view their previously submitted feedback at `/event-feedback/[slug]/response`:
+
+- Read-only display of their answers
+- Same visual format as the submission form
+- Accessible only to the user who submitted the response
+
+## User Interface Features
+
+### Theme Support
+
+<Card title="Dark Mode" icon="moon">
+  Full dark mode support using `next-themes` with system preference detection.
+  
+  Theme switcher in header component at `src/components/header.tsx:31`
+</Card>
+
+### Responsive Design
+
+All form components are fully responsive:
+
+- Mobile-friendly layout with vertical orientation
+- Desktop layout with horizontal rating scales
+- Adaptive navigation and header
+
+### User Feedback
+
+- **Toast notifications** using Sonner for success/error messages
+- **Form validation errors** displayed inline with field-level error messages
+- **Loading states** during form submission
+
+## Navigation
+
+### Header Component
+
+The header provides consistent navigation across the app:
+
+- Navet logo (responsive - full logo on desktop, "N" icon on mobile)
+- Theme switcher toggle
+- User dropdown menu with sign out option
+
+Defined in `src/components/header.tsx:17`
+
+### Home Page Redirect
+
+The root page (`/`) redirects users to ifinavet.no, as Hugin is intended to be accessed through event-specific links.
+
+## Error Handling
+
+### Global Error Boundaries
+
+- `error.tsx` - Route-level error boundary
+- `global-error.tsx` - Application-level error boundary
+- `not-found.tsx` - 404 page with redirect to ifinavet.no
+- `unauthorized.tsx` - Unauthorized access page
+
+### Sentry Integration
+
+Production error tracking and monitoring configured in:
+
+- `sentry.server.config.ts` - Server-side error tracking
+- `sentry.edge.config.ts` - Edge runtime error tracking
+- Organization: `ifi-navet`
+- Project: `bifrost` (shared project)
+
+## Analytics
+
+### PostHog Integration
+
+Optional analytics tracking for product insights:
+
+- Page view tracking via `PostHogPageView` component
+- Custom event tracking capabilities
+- Privacy-focused with EU hosting option
+- Configured via environment variables
+
+Implemented in `src/providers/posthog-provider.tsx:1` and `src/app/posthog-page-view.tsx:1`

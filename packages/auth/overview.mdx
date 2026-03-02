@@ -1,0 +1,291 @@
+---
+title: Auth Package
+description: Authentication and authorization utilities for the workspace
+---
+
+The `@workspace/auth` package provides authentication and authorization utilities built on top of Clerk and Convex. It offers convenient functions for checking user permissions and retrieving authentication tokens.
+
+## Installation
+
+The package is available as a workspace dependency:
+
+```json
+{
+  "dependencies": {
+    "@workspace/auth": "workspace:*"
+  }
+}
+```
+
+## Exports
+
+All functions are exported from the main entry point:
+
+```typescript
+import {
+  getAuthToken,
+  hasBasicRights,
+  hasEditRights,
+  hasAdminRights,
+  hasAllRights,
+} from "@workspace/auth";
+```
+
+## Authentication Token
+
+### getAuthToken
+
+Retrieves the Convex authentication token from Clerk:
+
+```typescript
+import { getAuthToken } from "@workspace/auth";
+
+const token = await getAuthToken();
+// Returns: string | undefined
+```
+
+<CodeGroup>
+
+```typescript Implementation
+import { auth } from "@clerk/nextjs/server";
+
+export async function getAuthToken() {
+  return (await (await auth()).getToken({ template: "convex" })) ?? undefined;
+}
+```
+
+```typescript Usage in API Route
+import { getAuthToken } from "@workspace/auth";
+
+export async function GET() {
+  const token = await getAuthToken();
+  
+  if (!token) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  
+  // Use token with Convex
+  const data = await fetchQuery(api.myFunction, {}, { token });
+  return Response.json(data);
+}
+```
+
+</CodeGroup>
+
+<Info>
+The token is generated using Clerk's Convex template, which is specifically designed for integration with Convex backend.
+</Info>
+
+## Access Rights Checking
+
+The package provides four functions for checking user permissions at different levels. All functions are server-side only and query the Convex backend.
+
+### hasBasicRights
+
+Checks if the user has basic internal access (includes internal, editor, admin, and super-admin):
+
+```typescript
+import { hasBasicRights } from "@workspace/auth";
+
+const canAccess = await hasBasicRights();
+// Returns: boolean
+```
+
+<CodeGroup>
+
+```typescript Implementation
+import { api } from "@workspace/backend/convex/api";
+import { fetchQuery } from "convex/nextjs";
+import { getAuthToken } from "./authToken";
+
+export async function hasBasicRights() {
+  const token = await getAuthToken();
+  return await fetchQuery(
+    api.accsessRights.checkRights,
+    { right: ["internal", "editor", "admin", "super-admin"] },
+    { token },
+  );
+}
+```
+
+```typescript Usage in Server Component
+import { hasBasicRights } from "@workspace/auth";
+import { redirect } from "next/navigation";
+
+export default async function InternalPage() {
+  const canAccess = await hasBasicRights();
+  
+  if (!canAccess) {
+    redirect("/unauthorized");
+  }
+  
+  return <div>Internal content</div>;
+}
+```
+
+</CodeGroup>
+
+### hasEditRights
+
+Checks if the user has editing permissions (includes editor, admin, and super-admin):
+
+```typescript
+import { hasEditRights } from "@workspace/auth";
+
+const canEdit = await hasEditRights();
+// Returns: boolean
+```
+
+```typescript
+export async function hasEditRights() {
+  const token = await getAuthToken();
+
+  return await fetchQuery(
+    api.accsessRights.checkRights,
+    { right: ["admin", "super-admin", "editor"] },
+    { token },
+  );
+}
+```
+
+### hasAdminRights
+
+Checks if the user has admin permissions (includes admin and super-admin):
+
+```typescript
+import { hasAdminRights } from "@workspace/auth";
+
+const isAdmin = await hasAdminRights();
+// Returns: boolean
+```
+
+```typescript
+export async function hasAdminRights() {
+  const token = await getAuthToken();
+
+  return await fetchQuery(
+    api.accsessRights.checkRights,
+    { right: ["admin", "super-admin"] },
+    { token },
+  );
+}
+```
+
+### hasAllRights
+
+Checks if the user has super-admin (full) permissions:
+
+```typescript
+import { hasAllRights } from "@workspace/auth";
+
+const isSuperAdmin = await hasAllRights();
+// Returns: boolean
+```
+
+```typescript
+export async function hasAllRights() {
+  const token = await getAuthToken();
+
+  return await fetchQuery(
+    api.accsessRights.checkRights,
+    { right: ["super-admin"] },
+    { token },
+  );
+}
+```
+
+## Access Levels
+
+The package works with the following access levels (from lowest to highest):
+
+<Steps>
+  <Step title="Internal">
+    Basic internal access for authenticated users
+  </Step>
+  <Step title="Editor">
+    Can edit content and manage events
+  </Step>
+  <Step title="Admin">
+    Can manage users and system settings
+  </Step>
+  <Step title="Super Admin">
+    Full system access with all permissions
+  </Step>
+</Steps>
+
+## Complete Usage Example
+
+Here's a complete example of protecting different parts of an application:
+
+```typescript
+import {
+  hasBasicRights,
+  hasEditRights,
+  hasAdminRights,
+  hasAllRights,
+} from "@workspace/auth";
+import { redirect } from "next/navigation";
+
+export default async function AdminDashboard() {
+  // Check basic access
+  const canAccess = await hasBasicRights();
+  if (!canAccess) {
+    redirect("/login");
+  }
+
+  // Get different permission levels
+  const canEdit = await hasEditRights();
+  const isAdmin = await hasAdminRights();
+  const isSuperAdmin = await hasAllRights();
+
+  return (
+    <div>
+      <h1>Dashboard</h1>
+      
+      {canEdit && (
+        <section>
+          <h2>Content Management</h2>
+          <EditContentPanel />
+        </section>
+      )}
+      
+      {isAdmin && (
+        <section>
+          <h2>User Management</h2>
+          <UserManagementPanel />
+        </section>
+      )}
+      
+      {isSuperAdmin && (
+        <section>
+          <h2>System Settings</h2>
+          <SystemSettingsPanel />
+        </section>
+      )}
+    </div>
+  );
+}
+```
+
+<Warning>
+All access rights functions must be called from server-side code (Server Components, Server Actions, Route Handlers). They cannot be used in Client Components.
+</Warning>
+
+## Dependencies
+
+The package depends on:
+
+- `@clerk/nextjs` - For authentication with Clerk
+- `@workspace/backend` - For Convex API definitions
+- `convex` - For Convex integration and queries
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Shared Package" icon="box" href="/packages/shared/overview">
+    Access rights constants and utilities
+  </Card>
+  <Card title="Backend Reference" icon="database" href="/backend/schema">
+    Convex backend schema and functions
+  </Card>
+</CardGroup>

@@ -1,0 +1,301 @@
+---
+title: Development Setup
+description: Complete guide to setting up Yggdrasil for local development
+---
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed on your system:
+
+<CardGroup cols={2}>
+  <Card title="Node.js" icon="node-js">
+    Version 20 or higher is required
+  </Card>
+  <Card title="pnpm" icon="box">
+    Version 10.22.0 (specified in package.json)
+  </Card>
+</CardGroup>
+
+<Note>
+  Yggdrasil uses **pnpm** as its package manager. The project specifies version 10.22.0, which will be automatically used if you have Corepack enabled.
+</Note>
+
+## Quick Start
+
+<Steps>
+  <Step title="Clone the repository">
+    ```bash
+    git clone https://github.com/your-org/yggdrasil.git
+    cd yggdrasil
+    ```
+  </Step>
+
+  <Step title="Install dependencies">
+    Install all dependencies across the monorepo:
+    
+    ```bash
+    pnpm install
+    ```
+    
+    This will install dependencies for all apps and packages in the workspace.
+  </Step>
+
+  <Step title="Set up environment variables">
+    Create `.env` files in the root and for each app you want to run. See the [Environment Variables](/development/environment) page for details.
+    
+    <Warning>
+      The project requires several environment variables for Clerk, Convex, and Resend to function properly. Ensure all required variables are set before running the development server.
+    </Warning>
+  </Step>
+
+  <Step title="Start development server">
+    Run the development server for all apps:
+    
+    ```bash
+    pnpm dev
+    ```
+    
+    This will start:
+    - **Midgard** on `http://localhost:3000`
+    - **Bifrost** on `http://localhost:3001`
+    - **Hugin** on `http://localhost:3003`
+  </Step>
+</Steps>
+
+## Project Structure
+
+The Yggdrasil monorepo is organized using Turborepo:
+
+```
+🌳 yggdrasil/
+├── 📁 apps/
+│   ├── 🌈 bifrost/      # Admin dashboard (port 3001)
+│   ├── 🌍 midgard/      # Main website ifinavet.no (port 3000)
+│   └── 🦅 hugin/        # Additional service (port 3003)
+├── 📦 packages/
+│   ├── 🗄️ backend/         # Convex backend logic
+│   ├── 📧 emails/          # React email components
+│   ├── 🔧 typescript-config/ # Shared TypeScript configuration
+│   └── 🎨 ui/           # Shared React component library
+├── 📁 documentation/      # Documentation files
+├── 📜 package.json      # Monorepo-level scripts and dependencies
+└── 📜 turbo.json        # Turborepo configuration
+```
+
+## Development Workflow
+
+### Running Individual Apps
+
+You don't always need to run all services. Use Turborepo's filtering to run specific apps:
+
+<CodeGroup>
+```bash Midgard Only
+pnpm --filter midgard dev
+```
+
+```bash Bifrost Only
+pnpm --filter bifrost dev
+```
+
+```bash Hugin Only
+pnpm --filter hugin dev
+```
+</CodeGroup>
+
+### Building the Project
+
+To build all apps and packages:
+
+```bash
+pnpm build
+```
+
+<Note>
+  The build process uses Turborepo's caching mechanism. Subsequent builds will be faster as unchanged packages are cached.
+</Note>
+
+### Code Quality Checks
+
+The project uses Biome for linting and formatting:
+
+<CodeGroup>
+```bash Check All
+pnpm check:all
+```
+
+```bash Auto-fix All
+pnpm check:all:fix
+```
+
+```bash Check Specific App
+pnpm --filter midgard check
+```
+
+```bash Fix Specific App
+pnpm --filter midgard check:fix
+```
+</CodeGroup>
+
+## Technology Stack
+
+### Core Technologies
+
+<CardGroup cols={2}>
+  <Card title="Next.js 16" icon="react">
+    All apps are built with Next.js 16.1.6 using the App Router
+  </Card>
+  <Card title="TypeScript" icon="code">
+    Version 5.7.3+ for type safety across the monorepo
+  </Card>
+  <Card title="Convex" icon="database">
+    Backend database with real-time sync capabilities
+  </Card>
+  <Card title="Clerk" icon="lock">
+    Authentication and user management
+  </Card>
+</CardGroup>
+
+### Development Tools
+
+- **Turborepo**: Monorepo management and build orchestration
+- **Biome**: Fast linting and formatting (replaces ESLint + Prettier)
+- **pnpm**: Efficient package management with workspaces
+- **Turbopack**: Fast Next.js development bundler
+
+## Setting Up Individual Services
+
+### Bifrost (Admin Dashboard)
+
+Bifrost is the administration interface for managing events and registrations.
+
+<Steps>
+  <Step title="Navigate to Bifrost">
+    ```bash
+    cd apps/bifrost
+    ```
+  </Step>
+
+  <Step title="Set up environment variables">
+    Ensure your `.env` file contains the required Clerk and Convex variables.
+  </Step>
+
+  <Step title="Run development server">
+    ```bash
+    pnpm dev
+    ```
+    
+    Access Bifrost at `http://localhost:3001`
+  </Step>
+</Steps>
+
+### Midgard (Main Website)
+
+Midgard is the public-facing website at ifinavet.no.
+
+<Steps>
+  <Step title="Navigate to Midgard">
+    ```bash
+    cd apps/midgard
+    ```
+  </Step>
+
+  <Step title="Set up environment variables">
+    Ensure your `.env` file contains the required Clerk and Convex variables.
+  </Step>
+
+  <Step title="Run development server">
+    ```bash
+    pnpm dev
+    ```
+    
+    Access Midgard at `http://localhost:3000`
+  </Step>
+</Steps>
+
+### Hugin
+
+Hugin is an additional service in the Yggdrasil ecosystem.
+
+<Steps>
+  <Step title="Navigate to Hugin">
+    ```bash
+    cd apps/hugin
+    ```
+  </Step>
+
+  <Step title="Set up environment variables">
+    Ensure your `.env` file contains the required Clerk and Convex variables.
+  </Step>
+
+  <Step title="Run development server">
+    ```bash
+    pnpm dev
+    ```
+    
+    Access Hugin at `http://localhost:3003`
+  </Step>
+</Steps>
+
+## Common Setup Issues
+
+### Node Version Mismatch
+
+If you encounter errors related to Node.js version:
+
+```bash
+# Check your Node version
+node --version
+
+# Should be 20.x or higher
+```
+
+<Note>
+  Consider using a Node version manager like `nvm` or `fnm` to manage multiple Node.js versions.
+</Note>
+
+### pnpm Not Found
+
+If `pnpm` is not installed:
+
+```bash
+# Enable Corepack (recommended)
+corepack enable
+
+# Or install pnpm globally
+npm install -g pnpm@10.22.0
+```
+
+### Port Already in Use
+
+If a port is already occupied:
+
+<CodeGroup>
+```bash Custom Port
+# Run on a different port
+pnpm --filter midgard dev -- -p 3005
+```
+
+```bash Kill Process
+# Find and kill the process using the port
+lsof -ti:3000 | xargs kill -9
+```
+</CodeGroup>
+
+## Next Steps
+
+Now that you have your development environment set up:
+
+<CardGroup cols={2}>
+  <Card title="Environment Variables" icon="key" href="/development/environment">
+    Configure all required environment variables
+  </Card>
+  <Card title="Available Commands" icon="terminal" href="/development/commands">
+    Learn about all available scripts and commands
+  </Card>
+  <Card title="Contributing" icon="code-branch" href="/contributing/guide">
+    Read the contribution guidelines
+  </Card>
+  <Card title="Architecture" icon="sitemap" href="/architecture">
+    Understand the system architecture
+  </Card>
+</CardGroup>

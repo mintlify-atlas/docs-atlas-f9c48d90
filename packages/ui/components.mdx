@@ -1,0 +1,333 @@
+---
+title: Available Components
+description: Complete list of UI components in the @workspace/ui package
+---
+
+## Component Library
+
+The `@workspace/ui` package provides a comprehensive set of accessible, themeable, and composable React components. All components are built with Radix UI primitives and styled with Tailwind CSS.
+
+## Form Components
+
+<CardGroup cols={2}>
+  <Card title="Button" icon="hand-pointer">
+    Versatile button component with multiple variants (default, destructive, outline, secondary, ghost, link) and sizes. Supports asChild prop for composition.
+  </Card>
+  
+  <Card title="Input" icon="text-cursor-input">
+    Styled text input with focus states, validation states, and file upload support.
+  </Card>
+  
+  <Card title="Textarea" icon="text">
+    Multi-line text input component with auto-resize support.
+  </Card>
+  
+  <Card title="Checkbox" icon="square-check">
+    Accessible checkbox component built on Radix UI.
+  </Card>
+  
+  <Card title="Radio Group" icon="circle-dot">
+    Radio button group for mutually exclusive selections.
+  </Card>
+  
+  <Card title="Select" icon="chevron-down">
+    Dropdown select component with keyboard navigation.
+  </Card>
+  
+  <Card title="Label" icon="tag">
+    Form label component with proper accessibility attributes.
+  </Card>
+  
+  <Card title="Form" icon="file-text">
+    Form wrapper component with React Hook Form integration.
+  </Card>
+  
+  <Card title="Field" icon="square">
+    Reusable form field component combining label, input, and error states.
+  </Card>
+  
+  <Card title="Input OTP" icon="lock-keyhole">
+    One-time password input component with individual character inputs.
+  </Card>
+  
+  <Card title="Calendar" icon="calendar">
+    Date picker component using react-day-picker.
+  </Card>
+</CardGroup>
+
+## Layout Components
+
+<CardGroup cols={2}>
+  <Card title="Card" icon="square">
+    Flexible container component with Header, Title, Description, Action, Content, and Footer subcomponents.
+  </Card>
+  
+  <Card title="Separator" icon="minus">
+    Visual or semantic separator between content sections.
+  </Card>
+  
+  <Card title="Tabs" icon="folder">
+    Tabbed interface component for organizing content.
+  </Card>
+  
+  <Card title="Sidebar" icon="panel-left">
+    Application sidebar component with collapsible support.
+  </Card>
+  
+  <Card title="Scroll Area" icon="scroll">
+    Custom scrollable area with styled scrollbars.
+  </Card>
+  
+  <Card title="Table" icon="table">
+    Semantic table component with Header, Body, Footer, Row, Head, Cell, and Caption subcomponents.
+  </Card>
+</CardGroup>
+
+## Navigation Components
+
+<CardGroup cols={2}>
+  <Card title="Navigation Menu" icon="menu">
+    Accessible navigation menu with dropdown support.
+  </Card>
+  
+  <Card title="Breadcrumb" icon="chevrons-right">
+    Breadcrumb navigation component showing the current page hierarchy.
+  </Card>
+  
+  <Card title="Pagination" icon="list">
+    Pagination component for navigating through pages of content.
+  </Card>
+</CardGroup>
+
+## Overlay Components
+
+<CardGroup cols={2}>
+  <Card title="Dialog" icon="square-dashed">
+    Modal dialog component with accessible focus management.
+  </Card>
+  
+  <Card title="Alert Dialog" icon="triangle-alert">
+    Modal dialog for important confirmations and alerts.
+  </Card>
+  
+  <Card title="Sheet" icon="panel-right">
+    Slide-out panel component (drawer from edge of screen).
+  </Card>
+  
+  <Card title="Drawer" icon="arrow-up-from-line">
+    Bottom drawer component using Vaul.
+  </Card>
+  
+  <Card title="Popover" icon="message-square">
+    Floating content container triggered by user interaction.
+  </Card>
+  
+  <Card title="Tooltip" icon="info">
+    Contextual information tooltip on hover or focus.
+  </Card>
+  
+  <Card title="Dropdown Menu" icon="chevron-down">
+    Contextual menu with keyboard navigation and nested items.
+  </Card>
+</CardGroup>
+
+## Feedback Components
+
+<CardGroup cols={2}>
+  <Card title="Sonner" icon="bell">
+    Toast notification system using Sonner library.
+  </Card>
+  
+  <Card title="Badge" icon="tag">
+    Small status indicator or label component.
+  </Card>
+  
+  <Card title="Skeleton" icon="loader">
+    Loading placeholder component for content that hasn't loaded yet.
+  </Card>
+  
+  <Card title="Spinner" icon="loader-circle">
+    Loading spinner component for indicating progress.
+  </Card>
+</CardGroup>
+
+## Data Display Components
+
+<CardGroup cols={2}>
+  <Card title="Avatar" icon="user-circle">
+    User avatar component with image fallback support.
+  </Card>
+  
+  <Card title="Chart" icon="chart-line">
+    Data visualization components built with Recharts.
+  </Card>
+  
+  <Card title="Carousel" icon="images">
+    Image and content carousel using Embla Carousel.
+  </Card>
+</CardGroup>
+
+## Utility Components
+
+<CardGroup cols={2}>
+  <Card title="Command" icon="terminal">
+    Command palette component using cmdk for searchable commands.
+  </Card>
+  
+  <Card title="Theme Switcher" icon="sun-moon">
+    Toggle between light and dark themes using next-themes.
+  </Card>
+</CardGroup>
+
+## Import Examples
+
+### Basic Component Import
+
+```tsx
+import { Button } from "@workspace/ui/components/button";
+import { Input } from "@workspace/ui/components/input";
+
+function MyForm() {
+  return (
+    <div>
+      <Input placeholder="Enter your name" />
+      <Button>Submit</Button>
+    </div>
+  );
+}
+```
+
+### Card with Subcomponents
+
+```tsx
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter
+} from "@workspace/ui/components/card";
+import { Button } from "@workspace/ui/components/button";
+
+function ProfileCard() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>User Profile</CardTitle>
+        <CardDescription>Manage your profile settings</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {/* Content goes here */}
+      </CardContent>
+      <CardFooter>
+        <Button>Save Changes</Button>
+      </CardFooter>
+    </Card>
+  );
+}
+```
+
+### Button Variants
+
+```tsx
+import { Button } from "@workspace/ui/components/button";
+
+function ButtonExamples() {
+  return (
+    <div className="flex gap-2">
+      <Button variant="default">Default</Button>
+      <Button variant="destructive">Delete</Button>
+      <Button variant="outline">Cancel</Button>
+      <Button variant="secondary">Secondary</Button>
+      <Button variant="ghost">Ghost</Button>
+      <Button variant="link">Link</Button>
+    </div>
+  );
+}
+```
+
+### Form with Validation
+
+```tsx
+import { Form } from "@workspace/ui/components/form";
+import { Field } from "@workspace/ui/components/field";
+import { Input } from "@workspace/ui/components/input";
+import { Button } from "@workspace/ui/components/button";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const schema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+});
+
+function LoginForm() {
+  const form = useForm({
+    resolver: zodResolver(schema),
+  });
+
+  return (
+    <Form {...form}>
+      <Field name="email" label="Email">
+        <Input type="email" />
+      </Field>
+      <Field name="password" label="Password">
+        <Input type="password" />
+      </Field>
+      <Button type="submit">Login</Button>
+    </Form>
+  );
+}
+```
+
+## Component Features
+
+### Variant System
+
+Many components use `class-variance-authority` (CVA) for managing variants:
+
+- **Button**: 6 variants (default, destructive, outline, secondary, ghost, link) and 6 sizes
+- **Badge**: Multiple color variants for different statuses
+- Type-safe variant props with TypeScript
+
+### Composition Pattern
+
+Components support the `asChild` prop for composition:
+
+```tsx
+import { Button } from "@workspace/ui/components/button";
+import Link from "next/link";
+
+<Button asChild>
+  <Link href="/dashboard">Go to Dashboard</Link>
+</Button>
+```
+
+### Utility Function
+
+All components use the `cn` utility for class name merging:
+
+```tsx
+import { cn } from "@workspace/ui/lib/utils";
+
+// Combines Tailwind classes and resolves conflicts
+const className = cn("px-4 py-2", "px-6", "bg-blue-500");
+// Result: "py-2 px-6 bg-blue-500"
+```
+
+## Contributing
+
+When adding new components to the library:
+
+1. Follow monorepo conventions for branching and commits
+2. Ensure components are fully typed with TypeScript
+3. Build with accessibility in mind (use Radix UI primitives)
+4. Include proper focus management and keyboard navigation
+5. Document component usage and props
+6. Run `pnpm lint` before committing
+
+## License
+
+Private. For internal use within the Yggdrasil monorepo only.

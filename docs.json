@@ -1,122 +1,128 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "Yggdrasil",
+  "theme": "almond",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#4F46E5",
+    "light": "#818CF8",
+    "dark": "#3730A3"
   },
-  "favicon": "/favicon.svg",
+  "navbar": {
+    "primary": {
+      "type": "github",
+      "href": "https://github.com/ifinavet/yggdrasil"
+    }
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/ifinavet/yggdrasil"
+    }
+  },
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Documentation",
         "groups": [
           {
-            "group": "Getting started",
+            "group": "Getting Started",
             "pages": [
-              "index",
+              "introduction",
               "quickstart",
-              "development"
+              "architecture"
             ]
           },
           {
-            "group": "Customization",
+            "group": "Development",
             "pages": [
-              "essentials/settings",
-              "essentials/navigation"
-            ]
-          },
-          {
-            "group": "Writing content",
-            "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/reusable-snippets"
-            ]
-          },
-          {
-            "group": "AI tools",
-            "pages": [
-              "ai-tools/cursor",
-              "ai-tools/claude-code",
-              "ai-tools/windsurf"
+              "development/setup",
+              "development/environment",
+              "development/commands"
             ]
           }
         ]
       },
       {
-        "tab": "API reference",
+        "tab": "Applications",
         "groups": [
           {
-            "group": "API documentation",
+            "group": "Midgard",
             "pages": [
-              "api-reference/introduction"
+              "applications/midgard/overview",
+              "applications/midgard/features",
+              "applications/midgard/structure"
             ]
           },
           {
-            "group": "Endpoint examples",
+            "group": "Bifrost",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "applications/bifrost/overview",
+              "applications/bifrost/features",
+              "applications/bifrost/structure"
+            ]
+          },
+          {
+            "group": "Hugin",
+            "pages": [
+              "applications/hugin/overview",
+              "applications/hugin/features",
+              "applications/hugin/structure"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Backend",
+        "groups": [
+          {
+            "group": "Convex",
+            "pages": [
+              "backend/convex-setup",
+              "backend/schema",
+              "backend/functions"
+            ]
+          },
+          {
+            "group": "Authentication",
+            "pages": [
+              "backend/auth/clerk-integration",
+              "backend/auth/access-rights"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Packages",
+        "groups": [
+          {
+            "group": "UI Library",
+            "pages": [
+              "packages/ui/overview",
+              "packages/ui/components"
+            ]
+          },
+          {
+            "group": "Shared Packages",
+            "pages": [
+              "packages/shared/overview",
+              "packages/auth/overview",
+              "packages/emails/overview"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Contributing",
+        "groups": [
+          {
+            "group": "Getting Involved",
+            "pages": [
+              "contributing/guide",
+              "contributing/code-of-conduct",
+              "contributing/security"
             ]
           }
         ]
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
-  },
-  "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
-  },
-  "navbar": {
-    "links": [
-      {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
-      }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
-    }
-  },
-  "contextual": {
-    "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
-   ]
-  },
-  "footer": {
-    "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
-    }
+    ]
   }
 }

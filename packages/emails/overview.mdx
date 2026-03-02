@@ -1,0 +1,369 @@
+---
+title: Emails Package
+description: React Email templates for transactional emails
+---
+
+The `@workspace/emails` package provides React-based email templates using React Email. It includes pre-built templates for common transactional emails related to event management and user notifications.
+
+## Installation
+
+The package is available as a workspace dependency:
+
+```json
+{
+  "dependencies": {
+    "@workspace/emails": "workspace:*"
+  }
+}
+```
+
+## Development
+
+Preview and develop email templates locally:
+
+```bash
+pnpm --filter @workspace/emails dev
+```
+
+This starts the React Email development server on port 3030, allowing you to preview and test email templates in the browser.
+
+## Email Templates
+
+The package includes several email templates for different scenarios:
+
+### Available Seat Email
+
+Notifies users when a seat becomes available for an event they're waitlisted for:
+
+```typescript
+import AvailableSeatEmail from "@workspace/emails/available-seat-email";
+import { render } from "@react-email/render";
+
+const html = render(
+  <AvailableSeatEmail 
+    event="Tech Workshop" 
+    url="https://ifinavet.no/events/confirm/abc123" 
+  />
+);
+```
+
+<CodeGroup>
+
+```typescript Component
+export default function AvailableSeatEmail({
+  event,
+  url,
+}: Readonly<{ event: string; url: string }>) {
+  // Returns a fully styled HTML email
+}
+```
+
+```typescript Usage with Convex
+import { render } from "@react-email/render";
+import AvailableSeatEmail from "@workspace/emails/available-seat-email";
+
+const emailHtml = render(
+  <AvailableSeatEmail
+    event="Workshop on AI"
+    url="https://ifinavet.no/events/confirm/xyz789"
+  />
+);
+
+// Send email using your email service
+await sendEmail({
+  to: user.email,
+  subject: `Ledig plass på ${event}`,
+  html: emailHtml,
+});
+```
+
+</CodeGroup>
+
+**Props:**
+- `event` (string) - Name of the event
+- `url` (string) - Confirmation URL for the user
+
+**Features:**
+- 16-hour acceptance window notification
+- Branded with IFI-Navet logo
+- Norwegian language content
+- Responsive design
+
+### Point Email
+
+Notifies users when they receive penalty points:
+
+```typescript
+import PointEmail from "@workspace/emails/point-email";
+import { render } from "@react-email/render";
+
+const html = render(
+  <PointEmail 
+    severity={2} 
+    reason="Meldte seg av arrangementet for sent" 
+  />
+);
+```
+
+<CodeGroup>
+
+```typescript Component
+export default function PointsEmail({
+  severity,
+  reason,
+}: Readonly<{ severity: number; reason: string }>) {
+  const pointsPlural = severity === 1 ? "prikk" : "prikker";
+  
+  // Returns a fully styled HTML email
+}
+```
+
+```typescript Usage Example
+import { render } from "@react-email/render";
+import PointEmail from "@workspace/emails/point-email";
+
+const emailHtml = render(
+  <PointEmail
+    severity={1}
+    reason="Ikke møtt opp på arrangement uten å gi beskjed"
+  />
+);
+
+await sendEmail({
+  to: user.email,
+  subject: `Du har fått ${severity} prikk${severity === 1 ? '' : 'er'}`,
+  html: emailHtml,
+});
+```
+
+</CodeGroup>
+
+**Props:**
+- `severity` (number) - Number of penalty points (1-3)
+- `reason` (string) - Explanation for the penalty
+
+**Features:**
+- Automatic singular/plural handling ("prikk" vs "prikker")
+- Displays reason in a highlighted section
+- Link to user profile to view all points
+- Contact information for appeals
+
+### Free For All Email
+
+Notifies users when an event becomes open for all (no waitlist):
+
+```typescript
+import FreeForAllEmail from "@workspace/emails/free-for-all-email";
+```
+
+**Props:**
+- `event` (string) - Name of the event
+- `url` (string) - Registration URL
+
+### Locked Out Email
+
+Notifies users when they're temporarily locked out from registrations:
+
+```typescript
+import LockedOutEmail from "@workspace/emails/locked-out-email";
+```
+
+**Props:**
+- `event` (string) - Name of the event
+- `url` (string) - More information URL
+
+## Email Styling
+
+All email templates use:
+
+- **React Email Components** - Pre-built, tested email components
+- **Tailwind CSS** - Utility-first styling with pixel-based preset
+- **Responsive Design** - Mobile-friendly layouts
+- **Brand Colors** - Primary color: `#2f3e5f`
+
+### Custom Tailwind Configuration
+
+The templates use a custom Tailwind config optimized for email clients:
+
+```typescript
+<Tailwind
+  config={{
+    presets: [pixelBasedPreset],
+    theme: {
+      extend: {
+        colors: {
+          primary: "#2f3e5f",
+        },
+      },
+    },
+  }}
+>
+  {/* Email content */}
+</Tailwind>
+```
+
+<Info>
+The `pixelBasedPreset` ensures compatibility with email clients that don't support rem units.
+</Info>
+
+## Rendering Emails
+
+The package uses `@react-email/render` to convert React components to HTML:
+
+```typescript
+import { render } from "@react-email/render";
+import AvailableSeatEmail from "@workspace/emails/available-seat-email";
+
+// Render to HTML
+const html = render(
+  <AvailableSeatEmail 
+    event="Workshop" 
+    url="https://example.com/confirm" 
+  />
+);
+
+// Render to plain text
+const text = render(
+  <AvailableSeatEmail 
+    event="Workshop" 
+    url="https://example.com/confirm" 
+  />,
+  { plainText: true }
+);
+```
+
+## Email Components
+
+All templates use these React Email components:
+
+<CardGroup cols={2}>
+  <Card title="Container" icon="box">
+    Responsive email container with max-width
+  </Card>
+  <Card title="Heading" icon="heading">
+    Semantic heading elements (h1, h2, etc.)
+  </Card>
+  <Card title="Text" icon="paragraph">
+    Paragraph text with proper spacing
+  </Card>
+  <Card title="Img" icon="image">
+    Optimized images with fallbacks
+  </Card>
+  <Card title="Hr" icon="minus">
+    Horizontal divider line
+  </Card>
+  <Card title="Section" icon="section">
+    Grouping and layout sections
+  </Card>
+</CardGroup>
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Testing Email Templates">
+    Always preview emails in the development server before deployment:
+    
+    ```bash
+    pnpm --filter @workspace/emails dev
+    ```
+    
+    Test in multiple email clients to ensure compatibility.
+  </Accordion>
+
+  <Accordion title="Localization">
+    All current templates are in Norwegian. When adding new templates or languages:
+    
+    - Keep text content as props when possible
+    - Consider extracting strings to translation files
+    - Maintain consistent date/time formatting
+  </Accordion>
+
+  <Accordion title="Image Assets">
+    Images are hosted on Convex cloud storage:
+    
+    ```typescript
+    <Img
+      src="https://gallant-pheasant-518.convex.cloud/api/storage/..."
+      alt="Navet Logo"
+      height="50px"
+    />
+    ```
+    
+    Ensure images are accessible and have appropriate alt text.
+  </Accordion>
+
+  <Accordion title="Responsive Design">
+    Use the Container component with max-width for responsive layouts:
+    
+    ```typescript
+    <Container className="mx-auto my-auto w-full max-w-[600px] px-4 py-8">
+      {/* Content */}
+    </Container>
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Dependencies
+
+The package depends on:
+
+- `@react-email/components` - Pre-built email components
+- `@react-email/render` - Render React to HTML
+- `react` & `react-dom` - React framework
+- `react-email` - Email development tools
+
+## Creating New Templates
+
+To create a new email template:
+
+<Steps>
+  <Step title="Create Template File">
+    Add a new `.tsx` file in the `emails/` directory:
+    
+    ```typescript
+    // emails/welcome-email.tsx
+    import { Container, Heading, Text, Html } from "@react-email/components";
+    
+    export default function WelcomeEmail({ name }: { name: string }) {
+      return (
+        <Html lang="no">
+          <Container>
+            <Heading>Velkommen, {name}!</Heading>
+            <Text>Vi er glade for å ha deg med.</Text>
+          </Container>
+        </Html>
+      );
+    }
+    ```
+  </Step>
+
+  <Step title="Test in Dev Server">
+    Start the development server to preview:
+    
+    ```bash
+    pnpm --filter @workspace/emails dev
+    ```
+  </Step>
+
+  <Step title="Use in Application">
+    Import and render the template:
+    
+    ```typescript
+    import WelcomeEmail from "@workspace/emails/welcome-email";
+    import { render } from "@react-email/render";
+    
+    const html = render(<WelcomeEmail name="John" />);
+    ```
+  </Step>
+</Steps>
+
+## Related Resources
+
+<CardGroup cols={2}>
+  <Card title="React Email Docs" icon="book" href="https://react.email">
+    Official React Email documentation
+  </Card>
+  <Card title="Email Client CSS Support" icon="code" href="https://www.caniemail.com">
+    Check CSS compatibility across email clients
+  </Card>
+</CardGroup>

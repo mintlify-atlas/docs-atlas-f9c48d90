@@ -1,0 +1,149 @@
+---
+title: UI Package Overview
+description: A modern, reusable React component library for the Yggdrasil monorepo
+---
+
+## Introduction
+
+`@workspace/ui` is the shared UI foundation for the Yggdrasil monorepo, providing a suite of customizable components and utilities. It is designed for rapid development, accessibility, and seamless theming, empowering teams to build high-quality interfaces efficiently.
+
+This package delivers accessible, themeable, and composable UI building blocks to accelerate development and ensure design consistency across all Yggdrasil projects.
+
+## Technology Stack
+
+The UI library is built with modern web technologies:
+
+- **React 19** — Modern component architecture
+- **TypeScript** — Type safety and great developer experience
+- **Radix UI Primitives** — Accessibility and composability
+- **Tailwind CSS** — Utility-first styling and theming
+- **class-variance-authority (CVA)** — Variant management for components
+- **lucide-react** — Icon library
+
+### Additional Dependencies
+
+- **React Hook Form** — Form state management
+- **Zod** — Schema validation
+- **Sonner** — Toast notifications
+- **Recharts** — Data visualization
+- **date-fns** — Date utilities
+- **cmdk** — Command menu
+- **Vaul** — Drawer component
+
+## Installation
+
+This package is intended for internal use within the Yggdrasil monorepo.
+
+```bash
+pnpm add @workspace/ui
+```
+
+## Project Structure
+
+```
+packages/ui/
+├── src/
+│   ├── components/      # Reusable React components
+│   ├── lib/             # Utility functions (e.g., cn)
+│   ├── hooks/           # Custom React hooks
+│   └── styles/
+│       └── globals.css  # Global styles and CSS variables
+├── package.json
+└── ...
+```
+
+## Usage
+
+### Importing Components
+
+Import components using the package exports:
+
+```tsx
+import { Button } from "@workspace/ui/components/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@workspace/ui/components/card";
+import { Input } from "@workspace/ui/components/input";
+```
+
+### Importing Utilities
+
+Import utility functions from the lib directory:
+
+```tsx
+import { cn } from "@workspace/ui/lib/utils";
+```
+
+### Importing Global Styles
+
+Include global styles in your application (if not already included):
+
+```css
+@import "@workspace/ui/globals.css";
+```
+
+## Package Exports
+
+The package provides the following exports:
+
+- `./globals.css` — Global styles
+- `./postcss` — PostCSS configuration
+- `./lib/*` — Utility functions
+- `./components/*` — React components
+- `./hooks/*` — Custom hooks
+
+## Theming
+
+The UI library is built with Tailwind CSS and CSS variables for easy customization.
+
+### Dark Mode Support
+
+Dark mode is supported via the `.dark` class. The library includes a `theme-switcher` component for toggling between light and dark themes.
+
+### Custom Themes
+
+Override CSS variables in your application to create custom themes:
+
+```css
+:root {
+  --primary: oklch(0.21 0.006 285.885);
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.21 0.006 285.885);
+  /* ... additional variables */
+}
+
+.dark {
+  --primary: oklch(0.92 0.006 285.885);
+  --background: oklch(0.15 0.006 285.885);
+  --foreground: oklch(0.92 0.006 285.885);
+  /* ... additional variables */
+}
+```
+
+## Accessibility
+
+All components are built with accessibility in mind:
+
+- Built on top of **Radix UI primitives** for ARIA compliance
+- Keyboard navigation support
+- Screen reader friendly
+- Focus management
+- Semantic HTML
+
+## Type Safety
+
+Every component is fully typed with TypeScript, providing:
+
+- IntelliSense support in your IDE
+- Type checking at build time
+- Better developer experience
+- Self-documenting APIs
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Available Components" icon="grid" href="/packages/ui/components">
+    Browse the complete list of available components
+  </Card>
+  <Card title="Contribution Guide" icon="code">
+    Learn how to contribute new components to the library
+  </Card>
+</CardGroup>

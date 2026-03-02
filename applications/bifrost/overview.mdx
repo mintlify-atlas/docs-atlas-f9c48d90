@@ -1,0 +1,110 @@
+---
+title: 'Bifrost Overview'
+description: 'Admin dashboard and backend for IFIs Navet student organization'
+icon: 'gauge-high'
+---
+
+## Introduction
+
+Bifrost is the official admin dashboard and backend for [ifinavet.no](https://ifinavet.no). It serves as the central hub for managing content, events, job listings, and other administrative tasks for the student organization IFIs Navet.
+
+The application is built with Next.js and provides a comprehensive admin interface for managing all aspects of the student organization's digital presence.
+
+## Technology Stack
+
+Bifrost leverages a modern, type-safe tech stack:
+
+<CardGroup cols={2}>
+  <Card title="Next.js 16" icon="react">
+    React framework with App Router and Server Components
+  </Card>
+  <Card title="TypeScript" icon="code">
+    Fully type-safe development experience
+  </Card>
+  <Card title="Convex" icon="database">
+    Backend-as-a-Service for real-time data
+  </Card>
+  <Card title="Clerk" icon="shield-halved">
+    User authentication and management
+  </Card>
+</CardGroup>
+
+### Core Technologies
+
+- **Framework**: Next.js 16.1.6 with React 19
+- **Language**: TypeScript 5.9
+- **Backend**: Convex (real-time database and backend)
+- **Authentication**: Clerk
+- **Styling**: Tailwind CSS 4.1 with Shadcn/ui components
+- **Rich Text Editor**: Tiptap (headless ProseMirror wrapper)
+- **Validation**: Zod for schema validation
+- **State Management**: Zustand
+- **Analytics**: PostHog
+- **Error Tracking**: Sentry
+
+### UI Components
+
+- **Component Library**: Shadcn/ui built on Radix UI primitives
+- **Icons**: Lucide React
+- **Forms**: TanStack Form with React Hook Form integration
+- **Tables**: TanStack Table
+- **Charts**: Recharts
+- **Notifications**: Sonner for toast messages
+
+<Note>
+  Bifrost uses the App Router with Next.js 16 and React 19, leveraging the latest features including Server Components and Server Actions.
+</Note>
+
+## Development
+
+### Prerequisites
+
+- Node.js v20 or later
+- pnpm package manager
+- Clerk account for authentication setup
+
+### Local Setup
+
+```bash
+# Navigate to the bifrost app
+cd apps/bifrost
+
+# Install dependencies
+pnpm install
+
+# Set up environment variables
+cp .env.example .env.local
+# Edit .env.local with your Clerk credentials
+
+# Run the development server
+pnpm dev
+```
+
+The application will be available at [http://localhost:3001](http://localhost:3001).
+
+<Note>
+  The application requires a Clerk account for authentication. Set up your Clerk application and add the credentials to `.env.local`.
+</Note>
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="Content Management" icon="file-lines" href="/applications/bifrost/features#content-management">
+    Create and manage resources, articles, and pages
+  </Card>
+  <Card title="Event Management" icon="calendar" href="/applications/bifrost/features#event-management">
+    Organize events with registration tracking
+  </Card>
+  <Card title="Job Listings" icon="briefcase" href="/applications/bifrost/features#job-listings">
+    Manage job opportunities for students
+  </Card>
+  <Card title="Company Database" icon="building" href="/applications/bifrost/features#company-database">
+    Track partner companies and their information
+  </Card>
+</CardGroup>
+
+## Project Links
+
+- **Repository**: Part of the Yggdrasil monorepo
+- **Live Site**: [ifinavet.no](https://ifinavet.no)
+- **Port**: 3001 (development)

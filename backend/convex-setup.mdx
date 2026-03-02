@@ -1,0 +1,203 @@
+---
+title: 'Convex Setup'
+description: 'Setting up and configuring the Convex backend'
+---
+
+## Overview
+
+The application uses [Convex](https://convex.dev) as its backend-as-a-service platform. Convex provides real-time database functionality, serverless functions, and built-in authentication.
+
+## Directory Structure
+
+The Convex backend is located in `packages/backend/convex/`:
+
+```
+convex/
+├── schema.ts              # Database schema definitions
+├── events.ts              # Event management functions
+├── registration.ts        # Event registration functions
+├── companies.ts           # Company management functions
+├── students.ts            # Student management functions
+├── users.ts              # User management functions
+├── _generated/           # Auto-generated types and API
+└── README.md             # Convex documentation
+```
+
+## Installation
+
+Install Convex in your project:
+
+```bash
+npm install convex
+```
+
+## Development Setup
+
+Start the Convex development server:
+
+```bash
+npx convex dev
+```
+
+This command:
+- Watches for changes in your Convex functions
+- Auto-generates TypeScript types
+- Syncs your schema with the development database
+- Provides real-time updates
+
+## Deployment
+
+Deploy your Convex functions to production:
+
+```bash
+npx convex deploy
+```
+
+## Environment Configuration
+
+Convex uses environment variables for configuration. Set up your `.env.local` file:
+
+```bash
+CONVEX_DEPLOYMENT=your-deployment-name
+```
+
+## Authentication
+
+The backend uses Convex's built-in authentication system. Functions check user identity:
+
+```typescript
+const identity = await ctx.auth.getUserIdentity();
+if (identity === null) {
+  throw new Error("Unauthenticated call to mutation");
+}
+```
+
+## Database Context
+
+Convex functions receive a `ctx` parameter that provides access to:
+
+<ParamField path="ctx.db" type="Database">
+  Database operations (query, insert, patch, delete)
+</ParamField>
+
+<ParamField path="ctx.auth" type="Auth">
+  Authentication utilities to get user identity
+</ParamField>
+
+<ParamField path="ctx.storage" type="Storage">
+  File storage for uploads (used for company logos)
+</ParamField>
+
+<ParamField path="ctx.scheduler" type="Scheduler">
+  Schedule background jobs and async tasks
+</ParamField>
+
+<ParamField path="ctx.runQuery" type="Function">
+  Execute internal queries from mutations
+</ParamField>
+
+<ParamField path="ctx.runMutation" type="Function">
+  Execute internal mutations from other mutations
+</ParamField>
+
+## Function Types
+
+Convex provides three main function types:
+
+### Query Functions
+
+Read-only operations that can be called from the client:
+
+```typescript
+import { query } from "./_generated/server";
+import { v } from "convex/values";
+
+export const getAll = query({
+  handler: async (ctx) => {
+    return await ctx.db.query("companies").collect();
+  },
+});
+```
+
+### Mutation Functions
+
+Write operations that modify the database:
+
+```typescript
+import { mutation } from "./_generated/server";
+import { v } from "convex/values";
+
+export const create = mutation({
+  args: {
+    name: v.string(),
+    description: v.string(),
+  },
+  handler: async (ctx, { name, description }) => {
+    await ctx.db.insert("companies", { name, description });
+  },
+});
+```
+
+### Internal Functions
+
+Functions that can only be called from other Convex functions:
+
+```typescript
+import { internalQuery, internalMutation } from "./_generated/server";
+
+export const getAllEvents = internalQuery({
+  args: { semester: v.number(), year: v.number() },
+  handler: async (ctx, { semester, year }) => {
+    // Implementation
+  },
+});
+```
+
+## Type Safety
+
+Convex automatically generates TypeScript types. Import them from `_generated`:
+
+```typescript
+import type { Doc, Id } from "./_generated/dataModel";
+import { api, internal } from "./_generated/api";
+```
+
+## Best Practices
+
+1. **Use validators** - Always define `args` with Convex validators
+2. **Type safety** - Use generated types for documents and IDs
+3. **Authentication** - Check user identity in protected mutations
+4. **Indexes** - Define indexes in schema for efficient queries
+5. **Error handling** - Throw descriptive errors for better debugging
+
+## CLI Commands
+
+<Accordion title="Common Convex CLI Commands">
+  ```bash
+  # Start development mode
+  npx convex dev
+  
+  # Deploy to production
+  npx convex deploy
+  
+  # Open Convex dashboard
+  npx convex dashboard
+  
+  # View logs
+  npx convex logs
+  
+  # Run a function from CLI
+  npx convex run myFunction --arg '{"key": "value"}'
+  ```
+</Accordion>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Database Schema" icon="database" href="/backend/schema">
+    Learn about the database tables and relationships
+  </Card>
+  <Card title="Convex Functions" icon="function" href="/backend/functions">
+    Explore the available backend functions
+  </Card>
+</CardGroup>

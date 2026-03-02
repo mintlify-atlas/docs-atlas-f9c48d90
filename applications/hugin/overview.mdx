@@ -1,0 +1,102 @@
+---
+title: Overview
+description: Event feedback collection application for IFI Navet
+---
+
+# Hugin Overview
+
+Hugin is a dedicated event feedback collection application for [ifinavet.no](https://ifinavet.no). It provides an interface for students who attended Navet events (particularly company presentations) to submit feedback forms and view their responses.
+
+## Purpose
+
+Hugin serves as the feedback collection portal where:
+
+- **Students** can provide feedback on company presentations and events they attended
+- **Event organizers** can collect structured feedback data to improve future events
+- **Companies** can receive insights about their presentations through student feedback
+
+## Key Characteristics
+
+<CardGroup cols={2}>
+  <Card title="Event-Focused" icon="calendar">
+    Specifically designed for post-event feedback collection linked to Navet events
+  </Card>
+  <Card title="Authenticated Access" icon="lock">
+    Uses Clerk authentication to ensure only verified attendees can submit feedback
+  </Card>
+  <Card title="Response Validation" icon="shield-check">
+    Prevents duplicate submissions and validates that users actually attended the event
+  </Card>
+  <Card title="Structured Forms" icon="list-check">
+    Collects consistent feedback through standardized question types (ratings, text, multiple choice)
+  </Card>
+</CardGroup>
+
+## Technology Stack
+
+Hugin is built with modern web technologies:
+
+- **[Next.js](https://nextjs.org/)** - React framework with App Router
+- **[React](https://react.dev/)** - UI library
+- **[TypeScript](https://www.typescriptlang.org/)** - Type-safe development
+- **[Convex](https://www.convex.dev/)** - Backend and real-time database
+- **[Clerk](https://clerk.com/)** - User authentication and management
+- **[Tailwind CSS](https://tailwindcss.com/)** - Utility-first styling
+- **[Shadcn/ui](https://ui.shadcn.com/)** - Component library with Radix UI
+- **[TanStack Form](https://tanstack.com/form)** - Type-safe form management
+- **[Zod](https://zod.dev/)** - Schema validation
+- **[Sentry](https://sentry.io/)** - Error tracking and monitoring
+- **[PostHog](https://posthog.com/)** - Product analytics
+
+## Development Setup
+
+<Steps>
+  <Step title="Prerequisites">
+    - Node.js v20 or later
+    - pnpm package manager
+  </Step>
+  
+  <Step title="Environment Variables">
+    Create a `.env.local` file with required credentials:
+    
+    ```bash
+    # Clerk Authentication
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test...
+    CLERK_SECRET_KEY=sk_test...
+    
+    # Convex Backend
+    NEXT_PUBLIC_CONVEX_URL=http....
+    
+    # PostHog Analytics (Optional)
+    NEXT_PUBLIC_POSTHOG_KEY=phc_....
+    NEXT_PUBLIC_POSTHOG_HOST=https://....
+    ```
+  </Step>
+  
+  <Step title="Install & Run">
+    ```bash
+    pnpm install
+    pnpm dev
+    ```
+    
+    The application runs on [http://localhost:3003](http://localhost:3003)
+  </Step>
+</Steps>
+
+## Workspace Integration
+
+Hugin is part of the Yggdrasil monorepo and uses shared workspace packages:
+
+- `@workspace/backend` - Shared Convex backend API
+- `@workspace/auth` - Authentication utilities
+- `@workspace/shared` - Shared utilities and helpers
+- `@workspace/ui` - Shared UI components
+- `@workspace/typescript-config` - TypeScript configuration
+
+## Port Configuration
+
+Hugin runs on port **3003** in development mode to avoid conflicts with other applications in the Yggdrasil monorepo.
+
+<Info>
+  The name "Hugin" comes from Norse mythology - one of Odin's two ravens that flew around the world gathering information, fitting for a feedback collection application.
+</Info>

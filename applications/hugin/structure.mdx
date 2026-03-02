@@ -1,0 +1,291 @@
+---
+title: Project Structure
+description: File and folder organization of the Hugin application
+---
+
+# Project Structure
+
+Hugin follows a standard Next.js App Router structure with organized component and utility directories.
+
+## Directory Overview
+
+```
+hugin/
+├── src/
+│   ├── app/                    # Next.js App Router pages
+│   ├── components/             # React components
+│   ├── lib/                    # Core logic and schemas
+│   ├── providers/              # Context providers
+│   └── assets/                 # Static assets
+├── public/                     # Public static files
+└── config files               # Configuration files
+```
+
+## Source Directory (`src/`)
+
+### App Directory (`src/app/`)
+
+The app directory contains all routes and pages using Next.js App Router:
+
+<CodeGroup>
+```plaintext Layout & Global Files
+app/
+├── layout.tsx              # Root layout with providers
+├── page.tsx                # Home page (redirects to ifinavet.no)
+├── globals.css             # Global styles
+├── error.tsx               # Error boundary
+├── global-error.tsx        # Global error boundary
+├── not-found.tsx           # 404 page
+├── unauthorized.tsx        # Unauthorized access page
+├── posthog-page-view.tsx   # Analytics page view tracker
+├── favicon.ico             # App favicon
+├── favicon.png             # PNG favicon
+├── favicon.svg             # SVG favicon
+├── apple-touch-icon.png    # iOS home screen icon
+└── robots.txt              # Search engine directives
+```
+
+```plaintext Event Feedback Route
+app/
+└── event-feedback/
+    └── [slug]/             # Dynamic event identifier
+        ├── page.tsx        # Feedback form page
+        ├── form.tsx        # Form component
+        ├── layout.tsx      # Feedback route layout
+        └── response/
+            ├── page.tsx            # View submitted response
+            └── readonly-form.tsx   # Read-only form display
+```
+</CodeGroup>
+
+#### Root Layout
+
+The root layout (`src/app/layout.tsx:30`) wraps the entire app with:
+
+1. **ClerkProvider** - Authentication context
+2. **ConvexClientProvider** - Convex backend connection
+3. **ThemeProvider** - Dark/light mode support
+4. **PostHogProvider** - Analytics tracking
+5. **Header** - Navigation component
+6. **Toaster** - Toast notification system
+
+```tsx
+<html lang="nb" suppressHydrationWarning>
+  <body>
+    <PostHogProvider>
+      <ClerkProvider>
+        <ConvexClientProvider>
+          <ThemeProvider>
+            <Header />
+            {children}
+            <Toaster />
+          </ThemeProvider>
+        </ConvexClientProvider>
+      </ClerkProvider>
+    </PostHogProvider>
+  </body>
+</html>
+```
+
+### Components Directory (`src/components/`)
+
+Reusable React components organized by functionality:
+
+```plaintext
+components/
+├── header.tsx              # Main navigation header
+└── input-cards/            # Form input components
+    ├── index.ts                # Barrel export
+    ├── rating-card.tsx         # 5-point rating scale
+    ├── text-input-card.tsx     # Text input field
+    ├── boolean-card.tsx        # Yes/no selection
+    └── multiple-options-card.tsx  # Multi-select checkboxes
+```
+
+#### Input Card Components
+
+All input cards follow a consistent pattern:
+
+- Accept a TanStack Form field API
+- Display label with optional required indicator
+- Handle validation and error display
+- Support readonly mode for viewing responses
+- Wrapped in a Card component for consistent styling
+
+<Tip>
+  The input card components are exported as a barrel module from `src/components/input-cards/index.ts:1` for cleaner imports.
+</Tip>
+
+### Library Directory (`src/lib/`)
+
+Core application logic and schemas:
+
+```plaintext
+lib/
+└── schema/
+    └── event-feedback-schema.ts  # Zod validation schema
+```
+
+#### Event Feedback Schema
+
+Defines the structure and validation rules for feedback forms using Zod:
+
+```typescript
+// src/lib/schema/event-feedback-schema.ts:3
+export const eventResponseFromSchema = z.object({
+  satisfaction: z.int().min(1, "Må velge et alternativ").max(5),
+  impression: z.int().min(1, "Må velge et alternativ").max(5),
+  expectation: z.int().min(1, "Må velge et alternativ").max(5),
+  toughts: z.string().min(1, "Venligst fyll inn").max(1000),
+  improvements: z.string().min(1, "Venligst fyll inn").max(1000),
+  want_to_work: z.enum(["ja", "nei"]),
+  word_of_mouth: z.array(z.string()).min(1),
+  other: z.string().max(1000),
+});
+```
+
+### Providers Directory (`src/providers/`)
+
+Context providers for global state and services:
+
+```plaintext
+providers/
+├── convex-client-provider.tsx  # Convex backend provider
+└── posthog-provider.tsx        # PostHog analytics provider
+```
+
+#### Convex Client Provider
+
+**File:** `src/providers/convex-client-provider.tsx:1`
+
+Wraps the Convex client with Clerk authentication integration, providing:
+
+- Real-time database connections
+- Authenticated API calls
+- React Query integration
+
+#### PostHog Provider
+
+**File:** `src/providers/posthog-provider.tsx:1`
+
+Initializes PostHog analytics with:
+
+- Client-side event tracking
+- Page view monitoring
+- User session recording (configurable)
+
+### Assets Directory (`src/assets/`)
+
+Static assets like images and logos:
+
+```plaintext
+assets/
+└── navet/
+    ├── logo_n_blaa.webp    # Navet "N" logo (mobile)
+    └── simple_logo_blaa.webp  # Full Navet logo (desktop)
+```
+
+## Configuration Files
+
+### Next.js Configuration
+
+**File:** `next.config.ts:1`
+
+Key configurations:
+
+- **Transpiled packages:** `@workspace/ui` for shared components
+- **Image domains:** Convex CDN, Clerk, and local development
+- **PostHog rewrites:** Privacy-focused analytics proxy at `/relay-aXgZ/*`
+- **Sentry integration:** Error tracking with source maps
+- **Turbopack:** Enabled for faster development builds
+
+```typescript
+const nextConfig: NextConfig = {
+  transpilePackages: ["@workspace/ui"],
+  cacheComponents: true,
+  images: {
+    remotePatterns: [
+      { hostname: convexSite },
+      { hostname: "img.clerk.com" },
+      { hostname: "127.0.0.1", port: "3210" },
+    ],
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/relay-aXgZ/:path*",
+        destination: "https://eu.i.posthog.com/:path*",
+      },
+    ];
+  },
+};
+```
+
+### TypeScript Configuration
+
+**File:** `tsconfig.json:1`
+
+Extends workspace TypeScript config with path aliases:
+
+- `@/*` → `./src/*` for clean imports
+
+### Package Configuration
+
+**File:** `package.json:2`
+
+Key details:
+
+- **Name:** `hugin`
+- **Version:** `0.1.0`
+- **Private:** `true`
+- **Dev port:** `3003` (via `--turbopack -p 3003`)
+
+#### Scripts
+
+```json
+{
+  "dev": "next dev --turbopack -p 3003",
+  "build": "next build",
+  "start": "next start",
+  "lint": "next lint",
+  "check": "biome check .",
+  "check:fix": "biome check . --write"
+}
+```
+
+### Component Configuration
+
+**File:** `components.json:1`
+
+Shadcn/ui configuration for component generation and styling preferences.
+
+### Sentry Configuration
+
+Error tracking configuration split by runtime:
+
+- `sentry.server.config.ts` - Server-side error tracking
+- `sentry.edge.config.ts` - Edge runtime error tracking
+
+Both configured for the `ifi-navet` organization and `bifrost` project.
+
+## Instrumentation
+
+**Files:**
+- `src/instrumentation.ts` - Server instrumentation setup
+- `src/instrumentation-client.ts` - Client instrumentation setup
+
+Used for initializing monitoring and telemetry services.
+
+## Routing Structure
+
+Hugin uses file-based routing with the following structure:
+
+| Route | File | Purpose |
+|-------|------|----------|
+| `/` | `app/page.tsx` | Redirect to ifinavet.no |
+| `/event-feedback/[slug]` | `app/event-feedback/[slug]/page.tsx` | Event feedback form |
+| `/event-feedback/[slug]/response` | `app/event-feedback/[slug]/response/page.tsx` | View submitted response |
+
+<Info>
+  All routes under `/event-feedback/*` require authentication via Clerk.
+</Info>

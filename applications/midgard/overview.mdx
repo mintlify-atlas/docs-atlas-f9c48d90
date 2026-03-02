@@ -1,0 +1,64 @@
+---
+title: Overview
+description: Learn about Midgard, the official website for IFI-Navet student association
+---
+
+## What is Midgard?
+
+Midgard is the official website for [ifinavet.no](https://ifinavet.no), the student association for the Department of Informatics at the University of Oslo. It serves as the main point of contact for students, companies, and the public.
+
+<Info>
+The name "Midgard" comes from Norse mythology, representing the realm of humans - fitting for a platform that connects students, companies, and the community.
+</Info>
+
+## Purpose
+
+Midgard serves multiple audiences:
+
+<CardGroup cols={2}>
+  <Card title="For Students" icon="graduation-cap">
+    Access events, job listings, and resources specifically curated for informatics students at UiO
+  </Card>
+  
+  <Card title="For Companies" icon="building">
+    Connect with talented students through job postings and company profiles
+  </Card>
+  
+  <Card title="For the Public" icon="users">
+    Learn about IFI-Navet's organization and activities
+  </Card>
+  
+  <Card title="For Members" icon="calendar">
+    Manage profiles, register for events, and stay connected with the community
+  </Card>
+</CardGroup>
+
+## Tech Stack
+
+Midgard is built with modern web technologies:
+
+- **[Next.js](https://nextjs.org/)** - React framework for production with App Router
+- **[React](https://react.dev/)** 19.2.4 - UI component library
+- **[TypeScript](https://www.typescriptlang.org/)** - Type-safe development
+- **[Convex](https://www.convex.dev/)** - Backend database and API
+- **[Clerk](https://clerk.com/)** - User authentication and management
+- **[Tailwind CSS](https://tailwindcss.com/)** - Utility-first styling
+- **[Shadcn/ui](https://ui.shadcn.com/)** - Reusable component library built with Radix UI
+- **[Tiptap](https://tiptap.dev/)** - Rich text editor for content creation
+- **[Zod](https://zod.dev/)** - Schema validation
+
+<Tip>
+Midgard uses shared workspace packages (`@workspace/ui`, `@workspace/backend`, `@workspace/shared`, `@workspace/auth`) from the monorepo for code reusability across applications.
+</Tip>
+
+## Development
+
+Midgard runs on **Node.js v20+** and uses **pnpm** for package management. The development server runs on port 3000 with Turbopack for fast refresh.
+
+```bash
+pnpm dev
+```
+
+<Info>
+The application requires Clerk credentials for authentication. Check the `.env.example` file for required environment variables.
+</Info>
